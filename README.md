@@ -2,7 +2,7 @@
 
 
 1. download the sourcecode into your pc  using the following command 
- `git clone`
+ `git clone   https://github.com/Ajay263/Event-Management.git`
 2. Create a virtiual envioment using the followin commdand
    `python -m venv venv`
 3. Activate the virtual enviroment using the following command
