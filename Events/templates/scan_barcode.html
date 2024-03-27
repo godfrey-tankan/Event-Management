@@ -1,0 +1,73 @@
+<!-- scan_barcode.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Scanner</title>
+</head>
+<body>
+    <h1>Barcode Scanner</h1>
+
+    <div id="camera-feed"></div>
+    <button id="start-scan">Start Scanning</button>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        const startScanButton = document.getElementById('start-scan');
+        const cameraFeed = document.getElementById('camera-feed');
+
+        startScanButton.addEventListener('click', () => {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.autoplay = true;
+                    cameraFeed.appendChild(video);
+
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    cameraFeed.appendChild(canvas);
+
+                    // Start barcode scanning logic here
+                    // You can use libraries like pyzbar.js for barcode scanning
+                    startBarcodeScanning(context);
+                })
+                .catch(error => {
+                    console.error('Error accessing camera:', error);
+                });
+        });
+
+        function startBarcodeScanning(context) {
+            const cap = new cv2.VideoCapture(0);
+
+            setInterval(() => {
+                cap.read()
+                    .then(frame => {
+                        const decodedCodes = decode(frame);
+                        if (decodedCodes) {
+                            decodedCodes.forEach(code => {
+                                const barcodeData = code.data.decode('utf-8');
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '{% url "scan_barcode" %}',
+                                    data: { barcode_data: barcodeData },
+                                    success: function(response) {
+                                        console.log(response);
+                                    },
+                                    error: function(xhr, textStatus, errorThrown) {
+                                        console.error('Error:', errorThrown);
+                                    }
+                                });
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error reading frame:', err);
+                    });
+            }, 1000); // Adjust the interval as needed
+        }
+    </script>
+</body>
+</html>

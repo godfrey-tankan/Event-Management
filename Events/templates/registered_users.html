@@ -1,0 +1,73 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Registered Users for {{ event.name }}</title>
+    <link href="{% static "css/base.css" %}" rel="stylesheet">
+    <!-- Replace 'your_css_file.css' with the path to your CSS file -->
+    <style>
+        /* CSS styles for the table */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <div class="logo">Your Logo</div>
+        <ul class="menu">
+            <li><a href="{% url 'event_list' %}">Event List</a></li>
+            <!-- Add more menu items as needed -->
+        </ul>
+        <div class="user">
+            {% if user.is_authenticated %}
+                Welcome, {{ user.username }} | <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a> | <a href="{% url 'register' %}">Register</a>
+            {% endif %}
+        </div>
+    </div>
+    <div id="content">
+        <h1>Registered Users for {{ event.name }}</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Registration Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event_registration in registered_users %}
+                <tr>
+                    <td>{{ event_registration.user.username }}</td>
+                    <td>{{ event_registration.user.email }}</td>
+                    <td>{{ event_registration.registration_date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

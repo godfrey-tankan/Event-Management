@@ -1,0 +1,36 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Attendees</title>
+    <link href="{% static "css/base.css" %}" rel="stylesheet">
+    <!-- Replace 'your_css_file.css' with the path to your CSS file -->
+</head>
+<body>
+    <div id="header">
+        <div class="logo">Your Logo</div>
+        <ul class="menu">
+            <li><a href="{% url 'event_list' %}">Event List</a></li>
+            <!-- Add more menu items as needed -->
+        </ul>
+        <div class="user">
+            {% if user.is_authenticated %}
+                Welcome, {{ user.username }} | <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a> | <a href="{% url 'register' %}">Register</a>
+            {% endif %}
+        </div>
+    </div>
+    <div id="content">
+        <h1>Event Attendees</h1>
+        <h2>{{ event.name }}</h2>
+        <ul>
+            {% for attendee in attendees %}
+                <li>{{ attendee.username }} - {{ attendee.email }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

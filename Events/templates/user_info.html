@@ -1,0 +1,19 @@
+<!-- user_info.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Info</title>
+</head>
+<body>
+    <h1>User Information</h1>
+    {% if profile %}
+        <p>Username: {{ profile.user.username }}</p>
+        <p>Email: {{ profile.user.email }}</p>
+        <!-- Add more user details as needed -->
+    {% else %}
+        <p>User not registered</p>
+    {% endif %}
+</body>
+</html>
