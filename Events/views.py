@@ -12,6 +12,7 @@ from .models import Event, EventRegistration
 from datetime import datetime
 from django.http import JsonResponse
 from django.utils import timezone
+import re
 
 
 
@@ -122,6 +123,10 @@ def view_registered_users(request, event_id):
 def scan_barcode(request):
     if request.method == 'POST':
         barcode_value =  request.POST.get("barcode_value")
+
+        if re.match(r".*[a-z]$", barcode_value, re.IGNORECASE):
+            barcode_value = barcode_value[:-1]
+
         barcode_data = Profile.objects.filter(barcode_value=barcode_value).first()
         if barcode_data:
             barcode_scan = BarcodeScan.objects.filter(user=barcode_data.user).first()
