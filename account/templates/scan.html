@@ -1,0 +1,39 @@
+{% extends "base.html" %} 
+
+{% block title %} Barcode Scanner {% endblock %}
+
+{% block content %}
+<form method="POST">
+    {% csrf_token %}
+  <!-- Other form fields -->
+  <input type="hidden" name="current_url" value="{{ current_url }}" />
+  <!-- Submit button -->
+</form>
+
+<input id="barcodeInput" type="text" autofocus />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function () {
+    $("#barcodeInput").on("input", function () {
+      var barcodeValue = $(this).val();
+      if (barcodeValue) {
+        $.ajax({
+          url: "",
+          method: "POST",
+          data: {
+            barcode_value: barcodeValue,
+          },
+          success: function (response) {
+            // Handle the success response
+            console.log(response);
+          },
+          error: function (xhr, status, error) {
+            // Handle the error response
+            console.log(error);
+          },
+        });
+      }
+    });
+  });
+</script>
+{% endblock %}

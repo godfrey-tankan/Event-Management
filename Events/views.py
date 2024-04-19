@@ -121,36 +121,39 @@ def view_registered_users(request, event_id):
 
 
 def scan_barcode(request):
-    if request.method == 'GET':
-        user = User.objects.filter(username=request.user.username).first()
-        if user is None:
-            return JsonResponse({'error': 'User not registered for the event. Please register first.'})
+    if request.method == 'POST':
 
-        barcode_scan = BarcodeScan.objects.filter(user=user).first()
+        print("Here is the request:", request.body)
+        # if user is None:
+        #     return JsonResponse({'error': 'User not registered for the event. Please register first.'})
 
-        if barcode_scan is None:
-            # First scan
-            barcode_data = Profile.objects.filter(user_id=request.user.id).first().barcode
-            if barcode_data:
-                with open(barcode_data.path, 'rb') as f:
-                    barcode_data = f.read()
+        barcode_data = Profile.objects.filter(barcode_value=request.get("barcode_value")).first()
+        if barcode_data:
+            barcode_scan = BarcodeScan.objects.filter(user=barcode_data.user).first()
+            if barcode_scan is None:
+                # First scan
+                # if barcode_data.barcode_value == request.get("barcode_value"):
+                #     with open(barcode_data.path, 'rb') as f:
+                #         barcode_data = f.read()
+                #         print("Here is the barcode data:", barcode_data)
 
-                scan = BarcodeScan(user=user, scan_time=datetime.now())
+                scan = BarcodeScan(user=barcode_data.user, scan_time=timezone.now())
                 scan.save()
-
                 return JsonResponse({'message': 'Please enjoy your race!'})
             else:
-                return JsonResponse({'error': 'Barcode data not found in request.'})
-        else:
-            # Subsequent scan
-            if barcode_scan.time_taken:
-                return JsonResponse({'message': f'This user {request.user.username} already participated','Time':f'Time taken: {barcode_scan.time_taken} seconds.'})
-            scan_time = timezone.now()
-            time_taken = (scan_time - barcode_scan.scan_time).total_seconds()
-            barcode_scan.scan_time = scan_time
-            barcode_scan.time_taken = time_taken
-            barcode_scan.save()
+                barcode_data = barcode_data.barcode_value
+                # Subsequent scan
+                if barcode_scan.time_taken:
+                    return JsonResponse({'message': f'This user {barcode_data.user.username} already participated', 'Time': f'Time taken: {barcode_scan.time_taken} seconds.'})
 
-            return JsonResponse({'message': f'Time taken: {time_taken} seconds.'})
+                scan_time = timezone.now()
+                time_taken = (scan_time - barcode_scan.scan_time).total_seconds()
+                barcode_scan.scan_time = scan_time
+                barcode_scan.time_taken = time_taken
+                barcode_scan.save()
+
+                return JsonResponse({'message': f'Time taken: {time_taken} seconds.'})
+        else:
+            return JsonResponse({'error': 'Barcode data not found in request.'})
     else:
-        return JsonResponse({'error': 'Invalid request method.'})
+        return render(request, 'scan.html',{'current_url': request.path})
