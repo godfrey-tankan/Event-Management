@@ -170,7 +170,7 @@ def scan_barcode_mobile(request):
                 # First scan
                 scan = BarcodeScan(user=barcode_data.user, scan_time=timezone.now())
                 scan.save()
-                return JsonResponse({'message': 'Please enjoy your race!', 'time_taken': None, 'error': None})
+                return JsonResponse({'message': 'Race start, Please enjoy your race!', 'time_taken': None, 'error': None})
             else:
                 # Subsequent scan
                 if barcode_scan.time_taken:
@@ -186,7 +186,7 @@ def scan_barcode_mobile(request):
 
                 return JsonResponse({'message': None, 'time_taken': f'Time taken: {time_taken} seconds.', 'error': None})
         else:
-            return JsonResponse({'message': None, 'time_taken': None, 'error': 'Barcode data not found in request.'})
+            return JsonResponse({'message': None, 'time_taken': None, 'error': 'No user Found.'})
     else:
         print("displaying template...")
         return render(request, 'mobile_scan.html')
