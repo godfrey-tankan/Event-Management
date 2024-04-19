@@ -1,15 +1,21 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from .models import Event
 from .forms import EventForm
-from django.contrib.auth.models import User
-
-
-from django.http import JsonResponse
 from account.models import Profile
-import cv2
-from pyzbar.pyzbar import decode
+from django.http import HttpResponse
+from .models import BarcodeScan
+from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import Event, EventRegistration
+from datetime import datetime
+from django.http import JsonResponse
+from django.utils import timezone
+
+
+
+# import cv2
 
 @staff_member_required
 def create_event(request):
@@ -47,18 +53,6 @@ def event_list(request):
     """
     events = Event.objects.all()
     return render(request, 'event_list.html', {'events': events})
-
-
-from django.contrib import messages
-
-from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect
-from .models import Event
-
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from .models import Event, EventRegistration
 
 @login_required
 def register_for_event(request, event_id):
@@ -104,9 +98,9 @@ def view_event_attendees(request, event_id):
     Returns:
         HttpResponse: HTTP response containing the list of users registered for the event.
     """
-    event = Event.objects.get(id=event_id)
-    attendees = event.attendees.all()
-    return render(request, 'event_attendees.html', {'event': event, 'attendees': attendees})
+    event = Event.objects.filter(id=event_id).all()
+    attendees = event
+    return render(request, 'event_attendees.html', {'event': event, 'attendees': event})
 
 
 @staff_member_required
@@ -126,102 +120,37 @@ def view_registered_users(request, event_id):
     return render(request, 'registered_users.html', {'event': event, 'registered_users': registered_users})
 
 
-
-
-# # views.py
-# import cv2
-# from pyzbar.pyzbar import decode
-# from django.http import JsonResponse
-# import numpy as np
-
-# def scan_barcode(request):
-#     return render(request, 'scan.html')
-
-# def BarcodeReader(image):
-#     # Decode the barcode image
-#     detectedBarcodes = decode(image)
-
-#     # If no barcode detected, return None
-#     if not detectedBarcodes:
-#         return None
-
-#     barcode_data = []
-#     # Traverse through all the detected barcodes in the image
-#     for barcode in detectedBarcodes:
-#         # Extract barcode data
-#         barcode_data.append(barcode.data.decode('utf-8'))
-#         # Draw a rectangle around the barcode area
-#         (x, y, w, h) = barcode.rect
-#         cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 5)
-
-#     # Display the image with detected barcodes
-#     cv2.imshow("Barcode Reader", image)
-#     cv2.waitKey(0)
-#     cv2.destroyAllWindows()
-
-#     return barcode_data
-
-# def process_barcode(request):
-#     if request.method == 'POST':
-#         try:
-#             # Retrieve the image data from the request
-#             image_data = request.POST.get('image_data')
-#             # Convert base64 encoded image data to bytes
-#             image_bytes = base64.b64decode(image_data.split(',')[1])
-#             # Convert the bytes data to a NumPy array
-#             nparr = np.frombuffer(image_bytes, np.uint8)
-#             # Decode the image using OpenCV
-#             image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-#             # Process the image to detect barcodes
-#             barcode_data = BarcodeReader(image)
-#             if barcode_data:
-#                 # Return the detected barcode data
-#                 return JsonResponse({'barcode_data': barcode_data})
-#             else:
-#                 return JsonResponse({'error': 'No barcode found.'})
-#         except Exception as e:
-#             return JsonResponse({'error': str(e)}, status=500)
-#     else:
-#         return JsonResponse({'error': 'Method not allowed.'}, status=405)
-
-
-
-
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from .models import BarcodeScan
-
-# views.py
-
-import cv2
-from pyzbar.pyzbar import decode
-from django.contrib.auth.models import User
-from django.shortcuts import render
-from django.http import HttpResponse
-from .models import BarcodeScan
-
-
-
-import cv2
-from pyzbar.pyzbar import decode
-from django.contrib.auth.models import User
-from django.http import JsonResponse
-from .models import BarcodeScan
-
 def scan_barcode(request):
-    if request.method == 'POST':
-        barcode_data = request.POST.get('barcode_data')
-        if barcode_data:
-            user = User.objects.filter(username=barcode_data).first()
-            if user is None:
-                message = 'User not registered for the event. Please register first.'
-            else:
-                message = 'Please enjoy your race!'
-                # Save scanned barcode data to the database
-                scan = BarcodeScan(user=user, barcode_data=barcode_data)
+    if request.method == 'GET':
+        user = User.objects.filter(username=request.user.username).first()
+        if user is None:
+            return JsonResponse({'error': 'User not registered for the event. Please register first.'})
+
+        barcode_scan = BarcodeScan.objects.filter(user=user).first()
+
+        if barcode_scan is None:
+            # First scan
+            barcode_data = Profile.objects.filter(user_id=request.user.id).first().barcode
+            if barcode_data:
+                with open(barcode_data.path, 'rb') as f:
+                    barcode_data = f.read()
+
+                scan = BarcodeScan(user=user, scan_time=datetime.now())
                 scan.save()
-            return JsonResponse({'message': message})
+
+                return JsonResponse({'message': 'Please enjoy your race!'})
+            else:
+                return JsonResponse({'error': 'Barcode data not found in request.'})
         else:
-            return JsonResponse({'error': 'Barcode data not found in request.'})
+            # Subsequent scan
+            if barcode_scan.time_taken:
+                return JsonResponse({'message': f'This user {request.user.username} already participated','Time':f'Time taken: {barcode_scan.time_taken} seconds.'})
+            scan_time = timezone.now()
+            time_taken = (scan_time - barcode_scan.scan_time).total_seconds()
+            barcode_scan.scan_time = scan_time
+            barcode_scan.time_taken = time_taken
+            barcode_scan.save()
+
+            return JsonResponse({'message': f'Time taken: {time_taken} seconds.'})
     else:
         return JsonResponse({'error': 'Invalid request method.'})

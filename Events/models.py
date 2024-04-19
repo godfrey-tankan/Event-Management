@@ -20,20 +20,16 @@ class EventRegistration(models.Model):
     def __str__(self):
         return f"{self.user.username} registered for {self.event.name}"
 
-
-
 from django.db import models
 from django.contrib.auth.models import User
 
 class BarcodeScan(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     scan_time = models.DateTimeField(auto_now_add=True)
-    time_taken = models.FloatField()
+    time_taken = models.FloatField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.user.username} - Scan Time: {self.scan_time}, Time Taken: {self.time_taken} seconds"
-
-
 
 
 
