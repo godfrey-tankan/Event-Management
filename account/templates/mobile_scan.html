@@ -1,9 +1,12 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html>
 <head>
   <title>Mobile Scan</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="/js/instascan.min.js"></script>
+  <script src="{% static 'Events/js/instascan.min.js' %}"></script>
 </head>
 <body>
   <video id="scanner"></video>
