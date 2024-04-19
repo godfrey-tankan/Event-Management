@@ -13,7 +13,7 @@ from datetime import datetime
 from django.http import JsonResponse
 from django.utils import timezone
 import re
-
+from django.views.decorators.csrf import csrf_exempt
 
 
 # import cv2
@@ -153,3 +153,39 @@ def scan_barcode(request):
             return JsonResponse({'message': None, 'time_taken': None, 'error': 'Barcode data not found in request.'})
     else:
         return render(request, 'scan.html', {'current_url': request.path})
+    
+@csrf_exempt
+def scan_barcode_mobile(request):
+    if request.method == 'POST':
+        barcode_value = request.POST.get('barcode_value', '')
+
+        if re.match(r".*[a-z]$", barcode_value, re.IGNORECASE):
+            barcode_value = barcode_value[:-1]
+
+        barcode_data = Profile.objects.filter(barcode_value=barcode_value).first()
+        if barcode_data:
+            barcode_scan = BarcodeScan.objects.filter(user=barcode_data.user).first()
+            if barcode_scan is None:
+                # First scan
+                scan = BarcodeScan(user=barcode_data.user, scan_time=timezone.now())
+                scan.save()
+                return JsonResponse({'message': 'Please enjoy your race!', 'time_taken': None, 'error': None})
+            else:
+                # Subsequent scan
+                if barcode_scan.time_taken:
+                    message = f'This user {barcode_data.user.username} already participated'
+                    time_taken = f'Time taken: {barcode_scan.time_taken} seconds.'
+                    return JsonResponse({'message': message, 'time_taken': time_taken, 'error': None})
+
+                scan_time = timezone.now()
+                time_taken = (scan_time - barcode_scan.scan_time).total_seconds()
+                barcode_scan.scan_time = scan_time
+                barcode_scan.time_taken = time_taken
+                barcode_scan.save()
+
+                return JsonResponse({'message': None, 'time_taken': f'Time taken: {time_taken} seconds.', 'error': None})
+        else:
+            return JsonResponse({'message': None, 'time_taken': None, 'error': 'Barcode data not found in request.'})
+    else:
+        return render(request, 'mobile_scan.html', {'current_url': request.path})
+        

@@ -10,6 +10,7 @@ urlpatterns = [
      path('events/event/<int:event_id>/registered_users/', views.view_registered_users, name='view_registered_users'),
 
     path('scan/', views.scan_barcode, name='scan_barcode'),
+    path('camera-scan/', views.scan_barcode, name='camera_scan_barcode'),
 
 
    

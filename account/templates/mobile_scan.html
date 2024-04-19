@@ -1,28 +1,29 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mobile Scan</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="/js/instascan.min.js"></script>
+</head>
+<body>
+  <video id="scanner"></video>
+  <div id="message" style="color: green;"></div>
+  <div id="timeTaken"></div>
+  <div id="error" style="color: brown;"></div>
 
-{% block title %} Barcode Scanner {% endblock %}
+  <script>
+    $(document).ready(function () {
+      let scanner = new Instascan.Scanner({ video: document.getElementById('scanner') });
+      // Get the current URL
+      var currentUrl = window.location.href;
 
-{% block content %}
-<form method="POST">
-  {% csrf_token %}
-  <!-- Other form fields -->
-  <input type="hidden" name="current_url" value="{{ current_url }}" />
-  <!-- Submit button -->
-</form>
-
-<input id="barcodeInput" type="text" autofocus />
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-  $(document).ready(function () {
-    $("#barcodeInput").on("input", function () {
-      var barcodeValue = $(this).val();
-      if (barcodeValue) {
+      scanner.addListener('scan', function (content) {
         $.ajax({
-          url: "",
+          url: currentUrl,  
           method: "POST",
           data: {
             csrfmiddlewaretoken: $("[name=csrfmiddlewaretoken]").val(),
-            barcode_value: barcodeValue,
+            barcode_value: content,
           },
           success: function (response) {
             console.log(response); // Log the response to inspect its content
@@ -56,13 +57,16 @@
             $("#error").text("An error occurred while processing the request.");
           },
         });
-      }
+      });
+
+      Instascan.Camera.getCameras().then(function (cameras) {
+        if (cameras.length > 0) {
+          scanner.start(cameras[0]);
+        } else {
+          console.error('No cameras found.');
+        }
+      });
     });
-  });
-</script> 
-
-<div id="message" style="color:green"></div>
-<div id="timeTaken"></div>
-<div id="error" style="color:brown;"></div>
-
-{% endblock %}
+  </script>
+</body>
+</html>
