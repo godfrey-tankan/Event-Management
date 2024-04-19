@@ -1,10 +1,10 @@
-{% extends "base.html" %} 
+{% extends "base.html" %}
 
 {% block title %} Barcode Scanner {% endblock %}
 
 {% block content %}
 <form method="POST">
-    {% csrf_token %}
+  {% csrf_token %}
   <!-- Other form fields -->
   <input type="hidden" name="current_url" value="{{ current_url }}" />
   <!-- Submit button -->
@@ -21,19 +21,48 @@
           url: "",
           method: "POST",
           data: {
+            csrfmiddlewaretoken: $("[name=csrfmiddlewaretoken]").val(),
             barcode_value: barcodeValue,
           },
           success: function (response) {
-            // Handle the success response
-            console.log(response);
+            console.log(response); // Log the response to inspect its content
+
+            try {
+              var jsonResponse = JSON.parse(JSON.stringify(response));
+              if (jsonResponse.message) {
+                $("#message").text(jsonResponse.message);
+              } else {
+                $("#message").text("");
+              }
+              if (jsonResponse.time_taken) {
+                $("#timeTaken").text(jsonResponse.time_taken);
+              } else {
+                $("#timeTaken").text("");
+              }
+              if (jsonResponse.error) {
+                $("#error").text(jsonResponse.error);
+              } else {
+                $("#error").text("");
+              }
+            } catch (error) {
+              console.log("Error parsing JSON response:", error);
+            }
           },
           error: function (xhr, status, error) {
             // Handle the error response
             console.log(error);
+            $("#message").text("");
+            $("#timeTaken").text("");
+            $("#error").text("An error occurred while processing the request.");
           },
         });
       }
     });
   });
-</script>
+</script> 
+
+<div id="message" style="color:green"></div>
+<div id="timeTaken"></div>
+<div id="error" style="color:brown;"></div>
+
 {% endblock %}
