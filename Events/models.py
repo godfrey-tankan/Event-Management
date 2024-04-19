@@ -20,7 +20,6 @@ class EventRegistration(models.Model):
     def __str__(self):
         return f"{self.user.username} registered for {self.event.name}"
 
-
 from django.db import models
 from django.contrib.auth.models import User
 

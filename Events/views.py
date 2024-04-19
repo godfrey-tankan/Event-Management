@@ -143,9 +143,10 @@ def scan_barcode(request):
                 return JsonResponse({'error': 'Barcode data not found in request.'})
         else:
             # Subsequent scan
+            if barcode_scan.time_taken:
+                return JsonResponse({'message': f'This user {request.user.username} already participated','Time':f'Time taken: {barcode_scan.time_taken} seconds.'})
             scan_time = timezone.now()
             time_taken = (scan_time - barcode_scan.scan_time).total_seconds()
-
             barcode_scan.scan_time = scan_time
             barcode_scan.time_taken = time_taken
             barcode_scan.save()
