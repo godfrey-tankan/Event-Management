@@ -9,10 +9,8 @@ urlpatterns = [
      path('events/<int:event_id>/attendees/', views.view_event_attendees, name='view_event_attendees'),
      path('events/event/<int:event_id>/registered_users/', views.view_registered_users, name='view_registered_users'),
 
- 
- 
-
     path('scan/', views.scan_barcode, name='scan_barcode'),
+    path('camera-scan/', views.scan_barcode_mobile, name='camera_scan_barcode'),
 
 
    
