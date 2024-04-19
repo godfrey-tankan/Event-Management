@@ -157,6 +157,7 @@ def scan_barcode(request):
 @csrf_exempt
 def scan_barcode_mobile(request):
     if request.method == 'POST':
+        print("posting....")
         barcode_value = request.POST.get('barcode_value', '')
 
         if re.match(r".*[a-z]$", barcode_value, re.IGNORECASE):
@@ -187,5 +188,6 @@ def scan_barcode_mobile(request):
         else:
             return JsonResponse({'message': None, 'time_taken': None, 'error': 'Barcode data not found in request.'})
     else:
+        print("displaying template...")
         return render(request, 'mobile_scan.html')
         
