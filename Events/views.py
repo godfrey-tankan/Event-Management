@@ -187,5 +187,5 @@ def scan_barcode_mobile(request):
         else:
             return JsonResponse({'message': None, 'time_taken': None, 'error': 'Barcode data not found in request.'})
     else:
-        return render(request, 'mobile_scan.html', {'current_url': request.path})
+        return render(request, 'mobile_scan.html')
         
