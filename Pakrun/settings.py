@@ -146,7 +146,7 @@ AUTHENTICATION_BACKENDS = [
     'account.authentication.EmailAuthBackend',
 ]
 
-CSRF_COOKIE_SECURE = True  
+CSRF_COOKIE_SECURE = False
 CSRF_COOKIE_HTTPONLY = True
 CSRF_USE_SESSIONS = True
 
