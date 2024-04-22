@@ -157,12 +157,10 @@ def scan_barcode(request):
 @csrf_exempt
 def scan_barcode_mobile(request):
     if request.method == 'POST':
-        print("posting....")
         barcode_value = request.POST.get('barcode_value', '')
 
         if re.match(r".*[a-z]$", barcode_value, re.IGNORECASE):
             barcode_value = barcode_value[:-1]
-
         barcode_data = Profile.objects.filter(barcode_value=barcode_value).first()
         if barcode_data:
             barcode_scan = BarcodeScan.objects.filter(user=barcode_data.user).first()
@@ -172,6 +170,7 @@ def scan_barcode_mobile(request):
                 scan.save()
                 return JsonResponse({'message': 'Race start, Please enjoy your race!', 'time_taken': None, 'error': None})
             else:
+                print("subsequent barcode_scan:",barcode_scan)
                 # Subsequent scan
                 if barcode_scan.time_taken:
                     message = f'This user {barcode_data.user.username} already participated'
@@ -188,6 +187,5 @@ def scan_barcode_mobile(request):
         else:
             return JsonResponse({'message': None, 'time_taken': None, 'error': 'No user Found.'})
     else:
-        print("displaying template...")
         return render(request, 'mobile_scan.html')
         

@@ -1,36 +1,96 @@
-{% load static %}
-
 <!DOCTYPE html>
 <html>
 <head>
   <title>Mobile Scan</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="{% static '/js/instascan.min.js' %}"></script>
-  <!-- <script type="text/javascript" src="https://github.com/LiveG-Technologies/ScanMap/blob/master/src/lib/instascan.min.js"></script> -->
-  
+  <script src="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.js"></script>
+  <style>
+    #scanner-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    #scanner {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    #camera-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body>
-  <video id="scanner"></video>
+  <div id="scanner-container">
+    <video id="scanner"></video>
+    <canvas id="camera-overlay"></canvas>
+  </div>
   <div id="message" style="color: green;"></div>
   <div id="timeTaken"></div>
   <div id="error" style="color: brown;"></div>
 
   <script>
-    $(document).ready(function () {
-      let scanner = new Instascan.Scanner({ video: document.getElementById('scanner') });
-      // Get the current URL
-      var currentUrl = window.location.href;
+    $(document).ready(function() {
+      var scannerContainer = document.getElementById("scanner-container");
+      var scanner = document.getElementById("scanner");
+      var cameraOverlay = document.getElementById("camera-overlay");
+      var context = cameraOverlay.getContext("2d");
 
-      scanner.addListener('scan', function (content) {
+      Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          constraints: {
+            facingMode: "environment", 
+          },
+          target: scanner,
+        },
+        decoder: {
+          readers: ["code_39_reader"],
+        },
+      }, function(err) {
+        if (err) {
+          console.error("Error initializing Quagga:", err);
+          return;
+        }
+        Quagga.start();
+
+        Quagga.onProcessed(function(result) {
+          var drawingCtx = Quagga.canvas.ctx.overlay;
+          var drawingCanvas = Quagga.canvas.dom.overlay;
+
+          if (result) {
+            if (result.boxes) {
+              drawingCtx.clearRect(0, 0, parseInt(drawingCanvas.getAttribute("width")), parseInt(drawingCanvas.getAttribute("height")));
+              result.boxes.forEach(function(box) {
+                if (box !== result.box) {
+                  Quagga.ImageDebug.drawPath(box, { x: 0, y: 1 }, drawingCtx, { color: "green", lineWidth: 2 });
+                }
+              });
+            }
+
+            if (result.codeResult && result.codeResult.code) {
+              Quagga.ImageDebug.drawPath(result.line, { x: "x", y: "y" }, drawingCtx, { color: "red", lineWidth: 3 });
+            }
+          }
+        });
+      });
+
+      Quagga.onDetected(function(result) {
+        var barcodeValue = result.codeResult.code;
         $.ajax({
-          url: currentUrl,  
+          url: window.location.href,
           method: "POST",
           data: {
             csrfmiddlewaretoken: $("[name=csrfmiddlewaretoken]").val(),
-            barcode_value: content,
+            barcode_value: barcodeValue,
           },
-          success: function (response) {
-            console.log(response); // Log the response to inspect its content
+          success: function(response) {
 
             try {
               var jsonResponse = JSON.parse(JSON.stringify(response));
@@ -53,22 +113,12 @@
               console.log("Error parsing JSON response:", error);
             }
           },
-          error: function (xhr, status, error) {
-            // Handle the error response
-            console.log(error);
+          error: function(xhr, status, error) {
             $("#message").text("");
             $("#timeTaken").text("");
             $("#error").text("An error occurred while processing the request.");
           },
         });
-      });
-
-      Instascan.Camera.getCameras().then(function (cameras) {
-        if (cameras.length > 0) {
-          scanner.start(cameras[0]);
-        } else {
-          console.error('No cameras found.');
-        }
       });
     });
   </script>
