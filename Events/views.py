@@ -162,16 +162,19 @@ def scan_barcode_mobile(request):
 
         if re.match(r".*[a-z]$", barcode_value, re.IGNORECASE):
             barcode_value = barcode_value[:-1]
-
+        print("barcode_value:",barcode_value)
         barcode_data = Profile.objects.filter(barcode_value=barcode_value).first()
         if barcode_data:
+            print("barcode_data:",barcode_data.user.username)
             barcode_scan = BarcodeScan.objects.filter(user=barcode_data.user).first()
             if barcode_scan is None:
+                print("firsttime barcode_scan:",barcode_scan)
                 # First scan
                 scan = BarcodeScan(user=barcode_data.user, scan_time=timezone.now())
                 scan.save()
                 return JsonResponse({'message': 'Race start, Please enjoy your race!', 'time_taken': None, 'error': None})
             else:
+                print("subsequent barcode_scan:",barcode_scan)
                 # Subsequent scan
                 if barcode_scan.time_taken:
                     message = f'This user {barcode_data.user.username} already participated'
