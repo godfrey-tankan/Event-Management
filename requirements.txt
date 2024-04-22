@@ -9,6 +9,3 @@ qrcode==7.4.2
 sqlparse==0.4.4
 typing-extensions==4.10.0
 tzdata==2024.1
-
-# numpy==1.26.4
-# opencv-python==4.9.0.80
