@@ -41,13 +41,12 @@
       var cameraOverlay = document.getElementById("camera-overlay");
       var context = cameraOverlay.getContext("2d");
 
-      // Configure QuaggaJS
       Quagga.init({
         inputStream: {
           name: "Live",
           type: "LiveStream",
           constraints: {
-            facingMode: "environment", // Or "user" for front camera
+            facingMode: "environment", 
           },
           target: scanner,
         },
@@ -59,10 +58,8 @@
           console.error("Error initializing Quagga:", err);
           return;
         }
-        // Start QuaggaJS
         Quagga.start();
 
-        // Draw camera stream on overlay canvas
         Quagga.onProcessed(function(result) {
           var drawingCtx = Quagga.canvas.ctx.overlay;
           var drawingCanvas = Quagga.canvas.dom.overlay;
@@ -84,7 +81,6 @@
         });
       });
 
-      // Register event listeners
       Quagga.onDetected(function(result) {
         var barcodeValue = result.codeResult.code;
         $.ajax({
@@ -95,7 +91,6 @@
             barcode_value: barcodeValue,
           },
           success: function(response) {
-            console.log(response); // Log the response to inspect its content
 
             try {
               var jsonResponse = JSON.parse(JSON.stringify(response));
@@ -119,8 +114,6 @@
             }
           },
           error: function(xhr, status, error) {
-            // Handle the error response
-            console.log(error);
             $("#message").text("");
             $("#timeTaken").text("");
             $("#error").text("An error occurred while processing the request.");
