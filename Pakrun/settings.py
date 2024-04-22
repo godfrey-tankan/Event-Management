@@ -145,3 +145,11 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'account.authentication.EmailAuthBackend',
 ]
+
+CSRF_COOKIE_SECURE = True  
+CSRF_COOKIE_HTTPONLY = True
+CSRF_USE_SESSIONS = True
+
+CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
+
+CSRF_TRUSTED_ORIGINS = ["https://event-management-q04c.onrender.com"]
