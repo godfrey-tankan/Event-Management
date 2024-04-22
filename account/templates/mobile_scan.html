@@ -1,63 +1,88 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mobile Scan</title>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.js"></script>
-  <style>
-    #scanner-container {
-      position: relative;
-      width: 100%;
-      height: 100%;
-    }
-    #scanner {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    #camera-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      pointer-events: none;
-    }
-  </style>
+ <title>Mobile Scan</title>
+ <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.js"></script>
+ <style>
+  #scanner-container {
+    position: relative;
+    width: 60%;
+    height: 60%;
+  }
+  #cameraCanvas {
+    width: 50%;
+    height: 50%;
+    object-fit: cover;
+  }
+  #camera-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+  }
+  .toast {
+ visibility: hidden;
+ max-width: 80%;
+ margin: auto;
+ background-color: #333;
+ color: #fff;
+ text-align: center;
+ border-radius: 2px;
+ padding: 16px;
+ position: fixed;
+ z-index: 1;
+ left: 50%;
+ bottom: 30px;
+ font-size: 17px;
+ transform: translateX(-50%);
+ opacity: 0;
+ transition: opacity 0.5s, visibility 0.5s;
+}
+
+.toast.show {
+ visibility: visible;
+ opacity: 1;
+}
+</style>
 </head>
 <body>
-  <div id="scanner-container">
-    <video id="scanner"></video>
-    <canvas id="camera-overlay"></canvas>
-  </div>
-  <div id="message" style="color: green;"></div>
-  <div id="timeTaken"></div>
-  <div id="error" style="color: brown;"></div>
+<div id="scanner-container">
+  <canvas id="cameraCanvas"></canvas>
+  <canvas id="camera-overlay"></canvas>
+</div>
+<div id="message" style="color: green;"></div>
+<div id="timeTaken"></div>
+<div id="error" style="color: brown;"></div>
+ <script>
+     $(document).ready(function() {
+      var canvas = document.getElementById('cameraCanvas');
+      var context = canvas.getContext('2d');
 
-  <script>
-    $(document).ready(function() {
-      var scannerContainer = document.getElementById("scanner-container");
-      var scanner = document.getElementById("scanner");
-      var cameraOverlay = document.getElementById("camera-overlay");
-      var context = cameraOverlay.getContext("2d");
+      // Function to draw video frame onto the canvas
+      function drawVideoFrame(video, context, width, height) {
+        context.drawImage(video, 0, 0, width, height);
+        requestAnimationFrame(() => drawVideoFrame(video, context, width, height));
+      }
 
-      Quagga.init({
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          constraints: {
-            facingMode: "environment", 
-          },
-          target: scanner,
-        },
-        decoder: {
-          readers: ["code_39_reader"],
-        },
-      }, function(err) {
-        if (err) {
-          console.error("Error initializing Quagga:", err);
-          return;
-        }
+      // Access the camera stream
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(stream) {
+          const video = document.createElement('video');
+          video.srcObject = stream;
+          video.play();
+
+          // Draw the video frame onto the canvas
+          video.addEventListener('play', function() {
+            drawVideoFrame(video, context, canvas.width, canvas.height);
+          });
+        })
+        .catch(function(err) {
+          console.error('An error occurred: ' + err);
+        });
+    });
         Quagga.start();
 
         Quagga.onProcessed(function(result) {
@@ -79,10 +104,10 @@
             }
           }
         });
-      });
 
       Quagga.onDetected(function(result) {
         var barcodeValue = result.codeResult.code;
+        showToast('Barcode detected: ' + barcodeValue, 3000);
         $.ajax({
           url: window.location.href,
           method: "POST",
@@ -120,7 +145,22 @@
           },
         });
       });
-    });
+      function showToast(message, duration = 3000) {
+      var toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+
+      document.body.appendChild(toast);
+
+      toast.classList.add('show');
+
+      setTimeout(function() {
+          toast.classList.remove('show');
+          setTimeout(function() {
+            document.body.removeChild(toast);
+          }, 500);
+      }, duration);
+  }
   </script>
 </body>
 </html>
