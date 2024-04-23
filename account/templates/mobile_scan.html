@@ -5,16 +5,24 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.js"></script>
   <style>
-    #scanner-container {
-      position: relative;
-      width: 100%;
-      height: 100%;
-    }
-    #scanner {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+     #scanner-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%;
+    height: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #cameraCanvas {
+    width: 50%;
+    height: 50%;
+    object-fit: cover;
+  }
+
     #camera-overlay {
       position: absolute;
       top: 0;
@@ -23,104 +31,143 @@
       bottom: 0;
       pointer-events: none;
     }
+
+    .popup {
+      visibility: hidden;
+      max-width: 80%;
+      margin: auto;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 2px;
+      padding: 16px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+      font-size: 17px;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.5s, visibility 0.5s;
+    }
+
+    .popup.show {
+      visibility: visible;
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
-  <div id="scanner-container">
-    <video id="scanner"></video>
-    <canvas id="camera-overlay"></canvas>
-  </div>
-  <div id="message" style="color: green;"></div>
-  <div id="timeTaken"></div>
-  <div id="error" style="color: brown;"></div>
+<input type="hidden" id="csrfToken" value="{% csrf_token %}">
 
-  <script>
-    $(document).ready(function() {
-      var scannerContainer = document.getElementById("scanner-container");
-      var scanner = document.getElementById("scanner");
-      var cameraOverlay = document.getElementById("camera-overlay");
-      var context = cameraOverlay.getContext("2d");
+<div id="scanner-container">
+  <canvas id="cameraCanvas"></canvas>
+  <canvas id="camera-overlay"></canvas>
+</div>
+<div class="popup" id="popup"></div>
+<div id="messagePopup" style="color: green;"></div>
+<div id="timeTaken" style="color: green"></div>
+<div id="errorPopup" style="color: rgb(172, 15, 15);"></div>
 
-      Quagga.init({
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          constraints: {
-            facingMode: "environment", 
+<script>
+  $(document).ready(function () {
+    var canvas = document.getElementById('cameraCanvas');
+    var context = canvas.getContext('2d');
+
+    // Function to draw video frame onto the canvas
+    function drawVideoFrame(video, context, width, height) {
+      context.drawImage(video, 0, 0, width, height);
+      requestAnimationFrame(() => drawVideoFrame(video, context, width, height));
+    }
+
+    // Function to show popups
+    function showPopup(popupId, message, duration = 3000) {
+      var popup = document.getElementById(popupId);
+      popup.textContent = message;
+      popup.classList.add('show');
+      setTimeout(function () {
+        popup.classList.remove('show');
+      }, duration);
+    }
+
+    // camera stream
+    navigator.mediaDevices.getUserMedia({video: true})
+      .then(function (stream) {
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        video.play();
+
+        video.addEventListener('play', function () {
+          drawVideoFrame(video, context, canvas.width, canvas.height);
+        });
+      })
+      .catch(function (err) {
+        console.error('An error occurred: ' + err);
+      });
+
+    // Initialize Quagga with the canvas as the target
+    Quagga.init({
+      inputStream: {
+        name: "Live",
+        type: "LiveStream",
+        constraints: {
+          facingMode: "environment",
+        },
+        target: canvas, // Use the canvas as the target
+      },
+      decoder: {
+        readers: ["code_39_reader"],
+      },
+    }, function (err) {
+      if (err) {
+        console.error("Error initializing Quagga:", err);
+        return;
+      }
+      Quagga.start();
+
+      Quagga.onDetected(function (result) {
+        var barcodeValue = result.codeResult.code;
+        showPopup('popup', 'Barcode detected: ' + barcodeValue, 3000);
+
+        var csrfToken = $('#csrfToken').val();
+        var url = window.location.href;
+        var data = {barcode: barcodeValue};
+        $.ajax({
+          url: url,
+          type: 'POST',
+          data: {
+            csrfmiddlewaretoken: csrfToken,
+            barcode_value: barcodeValue,
           },
-          target: scanner,
-        },
-        decoder: {
-          readers: ["code_39_reader"],
-        },
-      }, function(err) {
-        if (err) {
-          console.error("Error initializing Quagga:", err);
-          return;
-        }
-        Quagga.start();
+          success: function (response) {
+            console.log('Success:', response);
+            function showAndHideMessage(elementId, message) {
+                const element = document.getElementById(elementId);
+                element.textContent = message;
+                element.classList.add('show');
 
-        Quagga.onProcessed(function(result) {
-          var drawingCtx = Quagga.canvas.ctx.overlay;
-          var drawingCanvas = Quagga.canvas.dom.overlay;
-
-          if (result) {
-            if (result.boxes) {
-              drawingCtx.clearRect(0, 0, parseInt(drawingCanvas.getAttribute("width")), parseInt(drawingCanvas.getAttribute("height")));
-              result.boxes.forEach(function(box) {
-                if (box !== result.box) {
-                  Quagga.ImageDebug.drawPath(box, { x: 0, y: 1 }, drawingCtx, { color: "green", lineWidth: 2 });
-                }
-              });
+                setTimeout(() => {
+                  element.classList.remove('show');
+                }, 2000);
             }
-
-            if (result.codeResult && result.codeResult.code) {
-              Quagga.ImageDebug.drawPath(result.line, { x: "x", y: "y" }, drawingCtx, { color: "red", lineWidth: 3 });
+            if (response.message) {
+                showAndHideMessage('messagePopup', response.message);
             }
+            else if (response.error) {
+                showAndHideMessage('errorPopup', response.error);
+            }
+            else if (response.time_taken) {
+                showAndHideMessage('timeTaken', response.time_taken);
+            }
+            },
+          error: function (error) {
+            console.error('Error:', error);
+            // Handle the error here
           }
         });
       });
-
-      Quagga.onDetected(function(result) {
-        var barcodeValue = result.codeResult.code;
-        $.ajax({
-          url: window.location.href,
-          method: "POST",
-          data: {
-            csrfmiddlewaretoken: $("[name=csrfmiddlewaretoken]").val(),
-            barcode_value: barcodeValue,
-          },
-          success: function(response) {
-
-            try {
-              var jsonResponse = JSON.parse(JSON.stringify(response));
-              if (jsonResponse.message) {
-                $("#message").text(jsonResponse.message);
-              } else {
-                $("#message").text("");
-              }
-              if (jsonResponse.time_taken) {
-                $("#timeTaken").text(jsonResponse.time_taken);
-              } else {
-                $("#timeTaken").text("");
-              }
-              if (jsonResponse.error) {
-                $("#error").text(jsonResponse.error);
-              } else {
-                $("#error").text("");
-              }
-            } catch (error) {
-              console.log("Error parsing JSON response:", error);
-            }
-          },
-          error: function(xhr, status, error) {
-            $("#message").text("");
-            $("#timeTaken").text("");
-            $("#error").text("An error occurred while processing the request.");
-          },
-        });
-      });
     });
-  </script>
+  });
+</script>
 </body>
 </html>
