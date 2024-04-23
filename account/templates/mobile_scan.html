@@ -90,14 +90,13 @@
       }, duration);
     }
 
-    // Access the camera stream
+    // camera stream
     navigator.mediaDevices.getUserMedia({video: true})
       .then(function (stream) {
         const video = document.createElement('video');
         video.srcObject = stream;
         video.play();
 
-        // Draw the video frame onto the canvas
         video.addEventListener('play', function () {
           drawVideoFrame(video, context, canvas.width, canvas.height);
         });
@@ -147,7 +146,6 @@
                 element.textContent = message;
                 element.classList.add('show');
 
-                // Remove the 'show' class after 1 second (1000 milliseconds)
                 setTimeout(() => {
                   element.classList.remove('show');
                 }, 2000);

@@ -159,10 +159,8 @@ def scan_barcode(request):
 def scan_barcode_mobile(request):
     last_scan_time = request.session.get('last_scan_time')
     if last_scan_time and (timezone.now() - datetime.fromisoformat(last_scan_time)) < timedelta(seconds=3):
-        print("user scanned .....")
         return JsonResponse({'message': None, 'time_taken': None, 'error': None})
     request.session['last_scan_time'] = timezone.now().isoformat()
-    print("tapfurira....")
     if request.method == 'POST':
         barcode_value = request.POST.get('barcode_value', '')
         if re.match(r".*[a-z]$", barcode_value, re.IGNORECASE):
