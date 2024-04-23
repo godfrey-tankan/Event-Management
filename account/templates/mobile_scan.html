@@ -65,109 +65,122 @@
   <canvas id="camera-overlay"></canvas>
 </div>
 <div class="popup" id="popup"></div>
+<div class="prompts" style="display: flex; align-items: center; justify-content: center;" >
 <div id="messagePopup" style="color: green;"></div>
 <div id="timeTaken" style="color: green"></div>
 <div id="errorPopup" style="color: rgb(172, 15, 15);"></div>
-
+</div>
 <script>
-  $(document).ready(function () {
-    var canvas = document.getElementById('cameraCanvas');
-    var context = canvas.getContext('2d');
+ $(document).ready(function () {
+  var canvas = document.getElementById('cameraCanvas');
+  var context = canvas.getContext('2d');
 
-    // Function to draw video frame onto the canvas
-    function drawVideoFrame(video, context, width, height) {
-      context.drawImage(video, 0, 0, width, height);
-      requestAnimationFrame(() => drawVideoFrame(video, context, width, height));
+  // Function to draw video frame onto the canvas
+  function drawVideoFrame(video, context, width, height) {
+    context.drawImage(video, 0, 0, width, height);
+    requestAnimationFrame(() => drawVideoFrame(video, context, width, height));
+  }
+
+  // Function to show popups
+  function showPopup(popupId, message, duration = 3000) {
+    var popup = document.getElementById(popupId);
+    popup.textContent = message;
+    popup.classList.add('show');
+    setTimeout(function () {
+      popup.classList.remove('show');
+    }, duration);
+  }
+
+  // Check if the device is a mobile phone
+  function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  }
+
+  // Determine the constraints based on the device type
+  function getVideoConstraints() {
+    if (isMobileDevice()) {
+      return { facingMode: { exact: "environment" } }; // Rear camera
+    } else {
+      return { facingMode: "user" }; // Front camera
     }
+  }
 
-    // Function to show popups
-    function showPopup(popupId, message, duration = 3000) {
-      var popup = document.getElementById(popupId);
-      popup.textContent = message;
-      popup.classList.add('show');
-      setTimeout(function () {
-        popup.classList.remove('show');
-      }, duration);
-    }
+  // camera stream
+  navigator.mediaDevices.getUserMedia({ video: getVideoConstraints() })
+    .then(function (stream) {
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.play();
 
-    // camera stream
-    navigator.mediaDevices.getUserMedia({video: true})
-      .then(function (stream) {
-        const video = document.createElement('video');
-        video.srcObject = stream;
-        video.play();
-
-        video.addEventListener('play', function () {
-          drawVideoFrame(video, context, canvas.width, canvas.height);
-        });
-      })
-      .catch(function (err) {
-        console.error('An error occurred: ' + err);
+      video.addEventListener('play', function () {
+        drawVideoFrame(video, context, canvas.width, canvas.height);
       });
+    })
+    .catch(function (err) {
+      console.error('An error occurred: ' + err);
+    });
 
-    // Initialize Quagga with the canvas as the target
-    Quagga.init({
-      inputStream: {
-        name: "Live",
-        type: "LiveStream",
-        constraints: {
-          facingMode: "environment",
+  // Initialize Quagga with the canvas as the target
+  Quagga.init({
+    inputStream: {
+      name: "Live",
+      type: "LiveStream",
+      constraints: getVideoConstraints(),
+      target: canvas, // Use the canvas as the target
+    },
+    decoder: {
+      readers: ["code_39_reader"],
+    },
+  }, function (err) {
+    if (err) {
+      console.error("Error initializing Quagga:", err);
+      return;
+    }
+    Quagga.start();
+
+    Quagga.onDetected(function (result) {
+      var barcodeValue = result.codeResult.code;
+      showPopup('popup', 'Barcode detected: ' + barcodeValue, 3000);
+
+      var csrfToken = $('#csrfToken').val();
+      var url = window.location.href;
+      var data = { barcode: barcodeValue };
+      $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+          csrfmiddlewaretoken: csrfToken,
+          barcode_value: barcodeValue,
         },
-        target: canvas, // Use the canvas as the target
-      },
-      decoder: {
-        readers: ["code_39_reader"],
-      },
-    }, function (err) {
-      if (err) {
-        console.error("Error initializing Quagga:", err);
-        return;
-      }
-      Quagga.start();
+        success: function (response) {
+          console.log('Success:', response);
+          function showAndHideMessage(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.classList.add('show');
 
-      Quagga.onDetected(function (result) {
-        var barcodeValue = result.codeResult.code;
-        showPopup('popup', 'Barcode detected: ' + barcodeValue, 3000);
-
-        var csrfToken = $('#csrfToken').val();
-        var url = window.location.href;
-        var data = {barcode: barcodeValue};
-        $.ajax({
-          url: url,
-          type: 'POST',
-          data: {
-            csrfmiddlewaretoken: csrfToken,
-            barcode_value: barcodeValue,
-          },
-          success: function (response) {
-            console.log('Success:', response);
-            function showAndHideMessage(elementId, message) {
-                const element = document.getElementById(elementId);
-                element.textContent = message;
-                element.classList.add('show');
-
-                setTimeout(() => {
-                  element.classList.remove('show');
-                }, 2000);
-            }
-            if (response.message) {
-                showAndHideMessage('messagePopup', response.message);
-            }
-            else if (response.error) {
-                showAndHideMessage('errorPopup', response.error);
-            }
-            else if (response.time_taken) {
-                showAndHideMessage('timeTaken', response.time_taken);
-            }
-            },
-          error: function (error) {
-            console.error('Error:', error);
-            // Handle the error here
+            setTimeout(() => {
+              element.classList.remove('show');
+            }, 2000);
           }
-        });
+          if (response.message) {
+            showAndHideMessage('messagePopup', response.message);
+          }
+          else if (response.error) {
+            showAndHideMessage('errorPopup', response.error);
+          }
+          else if (response.time_taken) {
+            showAndHideMessage('timeTaken', response.time_taken);
+          }
+        },
+        error: function (error) {
+          console.error('Error:', error);
+          // Handle the error here
+        }
       });
     });
   });
+});
 </script>
 </body>
 </html>

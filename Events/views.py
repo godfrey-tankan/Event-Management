@@ -175,9 +175,9 @@ def scan_barcode_mobile(request):
             else:
                 # Subsequent scan
                 if barcode_scan.time_taken:
-                    message = f'This user {barcode_data.user.username} already participated'
+                    message = f'This user {barcode_data.user.username} already participated, Time taken: {barcode_scan.time_taken} seconds. '
                     time_taken = f'Time taken: {barcode_scan.time_taken} seconds.'
-                    return JsonResponse({'message': message, 'time_taken': time_taken, 'error': None})
+                    return JsonResponse({'message': message, 'time_taken': None, 'error': None})
 
                 scan_time = timezone.now()
                 time_taken = (scan_time - barcode_scan.scan_time).total_seconds()
