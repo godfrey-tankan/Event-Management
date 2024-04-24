@@ -3,9 +3,55 @@
 {% block title %}Create an account{% endblock %}
 
 {% block content %}
-  <h1>Create an account</h1>
-  <p>Please sign up using the following form:</p>
-  <form method="post" action="{% url 'register' %}">
+<style>
+      .register-form {
+  max-width: 400px;
+  margin: 0 auto;
+  margin-left: 40%;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.register-form input[type="submit"] {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.register-form input[type="submit"]:hover {
+  background-color: #376ca5;
+}
+
+.register-form input[type="text"],
+.register-form input[type="password"],
+.register-form input[type="email"]{
+  width: 90%;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.register-form input[type="password"] {
+  position: relative;
+}
+
+.register-form input[type="password"] ~ .password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+</style>
+<h1>Register</h1>
+<form method="post" action="{% url 'register' %}" class="register-form">
+    <h1>Create an account</h1>
     {% csrf_token %}
     {{ user_form.as_p }}
     {{ additional_fields.as_p }}

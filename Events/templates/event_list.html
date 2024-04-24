@@ -10,8 +10,61 @@
     <!-- Replace 'your_css_file.css' with the path to your CSS file -->
     <style>
         /* CSS styles for the buttons */
+        .search-event{
+            width: 20%;
+            padding: 10px;
+            border-radius: 5px;
+            margin-left: 75%;
+            margin-top: 1%;
+        }
         .register-button {
             background-color: #4CAF50; /* Green */
+            border: none;
+            color: white;
+            padding: 8px 10px;
+            text-align: center; 
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            transition-duration: 0.4s;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .deregister-button {
+            background-color: #e93131; /* Green */
+            border: none;
+            color: white;
+            padding: 8px 10px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            transition-duration: 0.4s;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        h1 {
+            border-bottom: none;
+        }
+        .event {
+            font-weight: bold;
+        }
+        .admin-events .events-list .creator-events {
+            margin-bottom: 40px;
+        }
+        .admin-events {
+            position: fixed;
+            margin-top: 5%;
+        }
+
+        .register-button:hover {
+            background-color: #45a049; /* Darker Green */
+        }
+
+        .view-users-button {
+            background-color: #45a049; /* green */
             border: none;
             color: white;
             padding: 10px 20px;
@@ -24,13 +77,27 @@
             cursor: pointer;
             border-radius: 5px;
         }
-
-        .register-button:hover {
-            background-color: #45a049; /* Darker Green */
+        .event-list-heading{
+            display: flex;
+            justify-content: center;
+            position: fixed;
         }
-
-        .view-users-button {
-            background-color: #007bff; /* Blue */
+        .delete-button {
+            background-color: #ff0000; /* red */
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            transition-duration: 0.4s;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .edit-button {
+            background-color: #007bff; /* blue */
             border: none;
             color: white;
             padding: 10px 20px;
@@ -48,12 +115,13 @@
             background-color: #0056b3; /* Darker Blue */
         }
     </style>
+
 </head>
 <body>
     <div id="header">
         <div class="logo">Your Logo</div>
         <ul class="menu">
-            <li><a href="{% url 'event_list' %}">Event List</a></li>
+            <li><a href="{% url 'create_event' %}">Create Event</a></li>
             <!-- Add more menu items as needed -->
         </ul>
         <div class="user">
@@ -76,17 +144,139 @@
                 {% endfor %}
             </ul>
         {% endif %}
-        <h1>Event List</h1>
-        <ul>
+
+        <input class="search-event" type="search" placeholder="Search event by name/location here!" oninput="searchEvents(this.value)">
+        <h1 class="event-list-heading">Event List</h1>
+        <ul class="admin-events">
+            <!-- {% if search_results  %}
+                {% for event in search_results %}
+                    {% if user.is_authenticated and user.is_staff %}
+                        <li class="events-list">
+                            <form method="post" action="{% url 'register_for_event' event.id %}" class="creator-events">
+                                <span class="event">Event Name:</span> {{ event.name }} - <span class="event">Date:</span> {{ event.date }} - <span class="event">Location:</span> {{ event.location }}
+                                {% csrf_token %}
+                                {% if user.is_authenticated and not user.is_staff %}
+                                    <button type="submit" class="register-button">Register</button>
+                                {% endif %}
+                                <div class="actions">
+                                    <a href="{% url 'view_registered_users' event.id %}" class="view-users-button">View Registered Users</a>
+                                    <a href="{% url 'edit_event' event.id %}" class="edit-button">Edit</a>
+                                    <a href="{% url 'delete_event' event.id %}" class="delete-button">Delete</a>
+                                </div>
+                            </form>
+                        </li>
+                    {% else %}
+                        {% if user.is_authenticated %}
+                            {% for registered_event in registered_events %}
+                                {% if registered_event and event.id == registered_event.id %}
+                                    <li class="events-list">
+                                        <form method="post" action="{% url 'register_for_event' event.id %}">
+                                            <span class="event">Event Name:</span> {{ event.name }} - <span class="event">Date:</span> {{ event.date }} - <span class="event">Location:</span> {{ event.location }}
+                                            {% csrf_token %}
+                                            <input type="hidden" name="user_id" value="{{ user.id }}">
+                                            <button type="submit" class="deregister-button">De-register</button>
+                                        </form>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <li class="events-list">
+                                <form method="post" action="{% url 'register_for_event' event.id %}">
+                                    <span class="event">Event Name:</span> {{ event.name }} - <span class="event">Date:</span> {{ event.date }} - <span class="event">Location:</span> {{ event.location }}
+                                    {% csrf_token %}
+                                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                                    <button type="submit" class="register-button">Register</button>
+                                </form>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            {% else %} -->
             {% for event in events %}
-                <li>{{ event.name }} - {{ event.date }} - {{ event.location }}
+            {% if user.is_authenticated and user.is_staff %}
+            <li class="events-list">
+                <form method="post" action="{% url 'register_for_event' event.id %}" class="creator-events">
+                    <span class="event">Event Name:</span> {{ event.name }} - <span class="event">Date:</span> {{ event.date }} - <span class="event">Location:</span> {{ event.location }}
+                    {% csrf_token %}
+                   
+                    <div class="actions">
+                        <a href="{% url 'view_registered_users' event.id %}" class="view-users-button">View Registered Users</a>
+                        <a href="{% url 'edit_event' event.id %}" class="edit-button">Edit</a>
+                        <a href="{% url 'delete_event' event.id %}" class="delete-button">Delete</a>
+                    </div>
+                </form>
+            </li>
+            {% else %}
+    {% if user.is_authenticated %}
+        {% if registered_events_id_list %}
+            {% for registered_events_id in registered_events_id_list %}
+                {% if registered_events_id == event.id %}
+                    <li class="events-list">
+                        <form method="post" action="{% url 'unregister_event' event.id %}">
+                            <span class="event">Event Name:</span> {{ event.name }} - <span class="event">Date:</span> {{ event.date }} - <span class="event">Location:</span> {{ event.location }}
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ user.id }}">
+                            <button type="submit" class="deregister-button">De-register</button>
+                        </form>
+                    </li>
+            {% else %}
+
+
+                <li class="events-list">
                     <form method="post" action="{% url 'register_for_event' event.id %}">
+                        <span class="event">Event Name1:</span> {{ event.name }} - <span class="event">Date:</span> {{ event.date }} - <span class="event">Location:</span> {{ event.location }}
                         {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
                         <button type="submit" class="register-button">Register</button>
                     </form>
-                    {% if user.is_authenticated and user.is_staff %}
-                        <a href="{% url 'view_registered_users' event.id %}" class="view-users-button">View Registered Users</a>
-                    {% endif %}
                 </li>
-            {% endfor %}
-        </ul
+                {% endif %}
+                {% endfor %}
+            {% else %}
+            <li class="events-list">
+                <form method="post" action="{% url 'register_for_event' event.id %}">
+                    <span class="event">Event Name:</span> {{ event.name }} - <span class="event">Date:</span> {{ event.date }} - <span class="event">Location:</span> {{ event.location }}
+                    {% csrf_token %}
+                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                    <button type="submit" class="register-button">Register</button>
+                </form>
+            </li>
+    {% endif %}
+{% endif %}
+                {% endif %}
+    {% endfor %}
+            {% endif %}
+        </ul>
+    </div>
+    <script>
+        function searchEvents(searchText) {
+            var events = document.getElementsByClassName('events-list');
+            var searchResults = searchText.trim().toLowerCase().split(' ');
+            var foundEvents = [];
+    
+            for (var i = 0; i < events.length; i++) {
+                var event = events[i];
+                var eventDetails = event.innerText.toLowerCase();
+                var showEvent = false;
+    
+                for (var j = 0; j < searchResults.length; j++) {
+                    var searchTerm = searchResults[j];
+                    if (eventDetails.includes(searchTerm)) {
+                        showEvent = true;
+                        break;
+                    }
+                }
+    
+                event.style.display = showEvent ? 'block' : 'none';
+    
+                if (showEvent) {
+                    foundEvents.push(event);
+                }
+            }
+    
+            var noMatchMessage = document.getElementById('no-match-message');
+            noMatchMessage.style.display = foundEvents.length > 0 ? 'none' : 'block';
+        }
+    </script>
+</body>
+</html>

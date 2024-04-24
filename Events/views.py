@@ -20,6 +20,7 @@ from django.views.decorators.csrf import csrf_exempt
 # import cv2
 
 @staff_member_required
+@login_required
 def create_event(request):
     """
     View function for creating an event.
@@ -42,7 +43,7 @@ def create_event(request):
     else:
         form = EventForm()
     return render(request, 'create_event.html', {'form': form})
-
+@login_required
 def event_list(request):
     """
     View function for displaying a list of events.
@@ -54,7 +55,13 @@ def event_list(request):
         HttpResponse: HTTP response containing the list of events.
     """
     events = Event.objects.all()
-    return render(request, 'event_list.html', {'events': events})
+    registered_events_id_list = []
+    registered_events_list = EventRegistration.objects.filter(user=request.user.id)
+    if registered_events_list:
+        for registered_event in registered_events_list:
+            registered_events_id_list.append(registered_event.event.id)
+    registered_events = registered_events_list if registered_events_list else None
+    return render(request, 'event_list.html', {'events': events, 'registered_events': registered_events, 'registered_events_id_list': registered_events_id_list})
 
 @login_required
 def register_for_event(request, event_id):
@@ -83,10 +90,88 @@ def register_for_event(request, event_id):
     
     return redirect('event_list')  # Redirect to event list after registration
 
+@login_required
+def unregister_event(request, event_id):
+    """
+    View function for unregistering from an event.
 
+    Only logged-in users can access this view.
+
+    Parameters:
+        request (HttpRequest): The HTTP request object.
+        event_id (int): The ID of the event to unregister from.
+
+    Returns:
+        HttpResponse: HTTP response redirecting to the event list page after unregistration.
+    """
+    # Get the event object from the database
+    event = get_object_or_404(Event, id=event_id)
+    
+    # Check if the user is registered for the event
+    registration = EventRegistration.objects.filter(event=event, user=request.user).first()
+    if registration:
+        registration.delete()
+        messages.success(request, 'Successfully unregistered from the event.')
+    else:
+        print("Not registered")
+        messages.warning(request, 'You are not registered for this event.')
+    
+    return redirect('event_list')
+
+@staff_member_required
+@login_required
+def delete_event(request, event_id):
+    """
+    View function for deleting an event.
+
+    Only staff members (admins) can access this view.
+
+    Parameters:
+        request (HttpRequest): The HTTP request object.
+        event_id (int): The ID of the event to delete.
+
+    Returns:
+        HttpResponse: HTTP response redirecting to the event list page after deletion.
+    """
+    event = get_object_or_404(Event, id=event_id)
+    if event:
+        event.delete()
+        messages.success(request, 'Event deleted successfully.')
+        return redirect('event_list')
+    else:
+        messages.error(request, 'Error deleting event.')
+        return redirect('event_list')
 
 
 @staff_member_required
+@login_required
+def edit_event(request, event_id):
+    """
+    View function for editing an event.
+
+    Only staff members (admins) can access this view.
+
+    Parameters:
+        request (HttpRequest): The HTTP request object.
+        event_id (int): The ID of the event to edit.
+
+    Returns:
+        HttpResponse: HTTP response containing the event edit form.
+    """
+    event = get_object_or_404(Event, id=event_id)
+    if request.method == 'POST':
+        form = EventForm(request.POST, instance=event)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Event updated successfully.')
+            return redirect('event_list')
+    else:
+        form = EventForm(instance=event)
+    return render(request, 'create_event.html', {'form': form, 'event': event,"event_mode":"edit"})
+
+
+@staff_member_required
+@login_required
 def view_event_attendees(request, event_id):
     """
     View function for viewing all users registered for an event.
@@ -106,6 +191,7 @@ def view_event_attendees(request, event_id):
 
 
 @staff_member_required
+@login_required
 def view_registered_users(request, event_id):
     """
     View function for displaying users registered for a specific event.

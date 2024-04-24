@@ -5,15 +5,11 @@
 {% block content %}
   <h1>Log-in</h1>
   {% if form.errors %}
-    <p>
+    <!-- <p>
       Your username and password didn't match.
       Please try again.
-    </p>
+    </p> -->
   {% else %}
-    <p>
-      Please, use the following form to log-in.
-      If you don't have an account <a href="{% url "register" %}">register here</a>.
-    </p>
   {% endif %}
   <div class="login-form">
     <form action="{% url 'login' %}" method="post">
@@ -26,6 +22,7 @@
       <a href="{% url "password_reset" %}">
         Forgotten your password?
       </a>
+      <a href="{%url "register" %}" style="color: rgb(75, 74, 74);padding-left: 60px;text-decoration: underline;">No account?</a>
     </p>
   </div>
 {% endblock %}

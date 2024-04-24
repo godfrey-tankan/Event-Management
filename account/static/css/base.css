@@ -3,6 +3,8 @@
 body {
     margin:0;
     padding:0;
+    justify-content: center;
+    align-items: center ;
     font-family:helvetica, sans-serif;
 }
 
@@ -80,14 +82,8 @@ ol {
     padding-top:4px;
 }
 
-#content {
-    padding:30px 100px;
-}
-
 /* forms */
-form {
-    overflow:auto;
-}
+
 
 form p {
     width:100%;
@@ -168,29 +164,25 @@ ul.messages li a.close {
     text-shadow:none;
 }
 
-.login-form {
-    float:left;
-}
-
 /* social-auth */
+
 .social {
-    float:right;
+    float: right;
 }
 .social li {
-    list-style:none;
-    padding:10px 20px;
-    margin:0 0 10px 0;
+    list-style: none;
+    padding: 10px 20px;
+    margin: 0 0 10px 0;
 }
 .social li a {
-    width:100%;
-    height:100%;
-    display:block;
-    color:#fff;
+    width: 100%;
+    height: 100%;
+    display: block;
+    color: #fff;
 }
-.social li.facebook { background:#3b5399; }
-.social li.twitter { background:#00cffa; }
-.social li.google { background:#de1710; }
-
+.social li.facebook { background: #3b5399; }
+.social li.twitter { background: #00cffa; }
+.social li.google { background: #de1710; }
 
 /* images */
 
