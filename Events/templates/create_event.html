@@ -4,16 +4,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Create Event</title>
+    <title >Create Event</title>
     <link href="{% static "css/base.css" %}" rel="stylesheet">
     <!-- Replace 'your_css_file.css' with the path to your CSS file -->
     <style>
 
     .event-form {
     max-width: 400px;
-
+    margin: 0 auto;
+    margin-left: 40%;
+    margin-top: 100px;
     border: 1px solid #ccc;
-    padding: -20px;
+    padding: 20px;
     border-radius: 5px;
     }
 
@@ -21,31 +23,31 @@
   background-color: #007bff;
   color: #fff;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
+  padding: 6px 6px;
+  border-radius: 2px;
   cursor: pointer;
   transition: background-color 0.3s;
+  margin-left: 73%;
+  margin-top: -10px;
 }
 
 .event-form input[type="submit"]:hover {
-  background-color: #6d92b9;
+  background-color: #0069d9;
 }
 
-.event-form input[type="text"],
-.event-form input[type="password"] {
+.event-form input[type="text"] {
   width: 90%;
   padding: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 4px;
 }
 
     </style>
 </head>
 <body>
-
     <div id="header">
-        <div class="logo">Your Logo</div>
+        <div class="logo">Logo</div>
         <ul class="menu">
-            <li><a href="{% url 'event_list' %}">Event List</a></li>
+            <li><a href="{% url 'event_list' %}">Events List</a></li>
             <!-- Add more menu items as needed -->
         </ul>
         <div class="user">
@@ -57,7 +59,7 @@
         </div>
     </div>
     <div id="content" class="event-form">
-        <h1>Create Event</h1>
+        <h1 style="text-decoration: none;">Create Event</h1>
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
