@@ -55,9 +55,13 @@ def event_list(request):
         HttpResponse: HTTP response containing the list of events.
     """
     events = Event.objects.all()
-    registered_events_list = EventRegistration.objects.filter(user=request.user)
+    registered_events_id_list = []
+    registered_events_list = EventRegistration.objects.filter(user=request.user.id)
+    if registered_events_list:
+        for registered_event in registered_events_list:
+            registered_events_id_list.append(registered_event.event.id)
     registered_events = registered_events_list if registered_events_list else None
-    return render(request, 'event_list.html', {'events': events, 'registered_events': registered_events})
+    return render(request, 'event_list.html', {'events': events, 'registered_events': registered_events, 'registered_events_id_list': registered_events_id_list})
 
 @login_required
 def register_for_event(request, event_id):
@@ -104,11 +108,12 @@ def unregister_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     
     # Check if the user is registered for the event
-    registration = EventRegistration.objects.filter(event=event, user=request.user.id).first()
+    registration = EventRegistration.objects.filter(event=event, user=request.user).first()
     if registration:
         registration.delete()
         messages.success(request, 'Successfully unregistered from the event.')
     else:
+        print("Not registered")
         messages.warning(request, 'You are not registered for this event.')
     
     return redirect('event_list')
@@ -162,8 +167,7 @@ def edit_event(request, event_id):
             return redirect('event_list')
     else:
         form = EventForm(instance=event)
-    return render(request, 'edit_event.html', {'form': form, 'event': event})
-
+    return render(request, 'create_event.html', {'form': form, 'event': event,"event_mode":"edit"})
 
 
 @staff_member_required

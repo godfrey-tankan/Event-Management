@@ -5,6 +5,14 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.js"></script>
   <style>
+
+body {
+    background-image: url("/media/background_images/scan2.jpeg");
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+
      #scanner-container {
     position: absolute;
     top: 50%;
@@ -12,15 +20,18 @@
     transform: translate(-50%, -50%);
     width: 60%;
     height: 60%;
+    border: 1px solid #000;
+    border-radius: 50px ;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
   #cameraCanvas {
-    width: 50%;
-    height: 50%;
-    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    border: 1px solid #000;
+    border-radius: 50px ;
   }
 
     #camera-overlay {
@@ -89,6 +100,31 @@
     setTimeout(function () {
       popup.classList.remove('show');
     }, duration);
+  }
+  function showScanningEffect() {
+    var overlayCanvas = document.getElementById('camera-overlay');
+    var overlayContext = overlayCanvas.getContext('2d');
+    overlayContext.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+    
+    var gradient = overlayContext.createLinearGradient(0, 0, overlayCanvas.width, 0);
+    gradient.addColorStop("0", "transparent");
+    gradient.addColorStop("0.5", "rgba(255, 255, 255, 0.5)");
+    gradient.addColorStop("1.0", "transparent");
+    
+    var scanSpeed = 5; // Adjust the scanning speed as needed
+    
+    var scanPosition = 0;
+    function animateScan() {
+      overlayContext.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+      overlayContext.fillStyle = gradient;
+      overlayContext.fillRect(scanPosition, 0, scanSpeed, overlayCanvas.height);
+      scanPosition += scanSpeed;
+      if (scanPosition < overlayCanvas.width) {
+        requestAnimationFrame(animateScan);
+      }
+    }
+    
+    animateScan();
   }
 
   // Check if the device is a mobile phone
@@ -178,6 +214,7 @@
           // Handle the error here
         }
       });
+      showScanningEffect();
     });
   });
 });

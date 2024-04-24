@@ -207,21 +207,33 @@
                 </form>
             </li>
             {% else %}
-            {% if user.is_authenticated %}
-            {% for registered_event in registered_events %}
-            {% if registered_event and event.id == registered_event.id %}
-            <li class="events-list">
-                <form method="post" action="{% url 'unregister_event' event.id %}">
-                    <span class="event">Event Name:</span> {{ event.name }} - <span class="event">Date:</span> {{ event.date }} - <span class="event">Location:</span> {{ event.location }}
-                    {% csrf_token %}
-                    <input type="hidden" name="user_id" value="{{ user.id }}">
-                    <button type="submit" class="deregister-button">De-register</button>
-                </form>
-            </li>
-            {% endif %}
-            {% endfor %}
+    {% if user.is_authenticated %}
+        {% if registered_events_id_list %}
+            {% for registered_events_id in registered_events_id_list %}
+                {% if registered_events_id == event.id %}
+                    <li class="events-list">
+                        <form method="post" action="{% url 'unregister_event' event.id %}">
+                            <span class="event">Event Name:</span> {{ event.name }} - <span class="event">Date:</span> {{ event.date }} - <span class="event">Location:</span> {{ event.location }}
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ user.id }}">
+                            <button type="submit" class="deregister-button">De-register</button>
+                        </form>
+                    </li>
             {% else %}
-            <li >
+
+
+                <li class="events-list">
+                    <form method="post" action="{% url 'register_for_event' event.id %}">
+                        <span class="event">Event Name1:</span> {{ event.name }} - <span class="event">Date:</span> {{ event.date }} - <span class="event">Location:</span> {{ event.location }}
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <button type="submit" class="register-button">Register</button>
+                    </form>
+                </li>
+                {% endif %}
+                {% endfor %}
+            {% else %}
+            <li class="events-list">
                 <form method="post" action="{% url 'register_for_event' event.id %}">
                     <span class="event">Event Name:</span> {{ event.name }} - <span class="event">Date:</span> {{ event.date }} - <span class="event">Location:</span> {{ event.location }}
                     {% csrf_token %}
@@ -229,8 +241,9 @@
                     <button type="submit" class="register-button">Register</button>
                 </form>
             </li>
+    {% endif %}
+{% endif %}
                 {% endif %}
-        {% endif %}
     {% endfor %}
             {% endif %}
         </ul>

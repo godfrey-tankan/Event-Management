@@ -62,11 +62,19 @@
         </div>
     </div>
     <div id="content" class="event-form">
+        {% if event_mode %}
+        <h1 style="text-decoration: none;">Edit Event</h1>
+        {% else %}
         <h1 style="text-decoration: none;">Create Event</h1>
+        {% endif %}
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
+            {% if event_mode %}
+            <input type="submit" value="Update Event">
+            {% else %}
             <input type="submit" value="Create Event">
+            {% endif %}
         </form>
     </div>
 </body>
