@@ -76,14 +76,41 @@ def register_for_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     
     # Check if the user is already registered for the event
-    if EventRegistration.objects.filter(event=event, user=request.user).exists():
+    if EventRegistration.objects.filter(event=event, user=request.user.id).exists():
         messages.warning(request, 'You are already registered for this event.')
     else:
         # Add the logged-in user to the attendees of the event
-        EventRegistration.objects.create(event=event, user=request.user)
+        EventRegistration.objects.create(event=event, user=request.user.id)
         messages.success(request, 'Successfully registered for the event.')
     
     return redirect('event_list')  # Redirect to event list after registration
+
+@login_required
+def unregister_event(request, event_id):
+    """
+    View function for unregistering from an event.
+
+    Only logged-in users can access this view.
+
+    Parameters:
+        request (HttpRequest): The HTTP request object.
+        event_id (int): The ID of the event to unregister from.
+
+    Returns:
+        HttpResponse: HTTP response redirecting to the event list page after unregistration.
+    """
+    # Get the event object from the database
+    event = get_object_or_404(Event, id=event_id)
+    
+    # Check if the user is registered for the event
+    registration = EventRegistration.objects.filter(event=event, user=request.user.id).first()
+    if registration:
+        registration.delete()
+        messages.success(request, 'Successfully unregistered from the event.')
+    else:
+        messages.warning(request, 'You are not registered for this event.')
+    
+    return redirect('event_list')
 
 
 

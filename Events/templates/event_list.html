@@ -128,9 +128,7 @@
                             {if registered_event}
                                 {% if event.id != registered_event.id %}
                                     <li>
-                                        Event ID: {{ event.id }} <!-- Display the event ID -->
-                                        Event user ID: {{ event.user }} <!-- Display the event ID -->
-                                        User ID: {{ user.id }} <!-- Display the user ID -->
+                                       
                                         {{ event.name }} - {{ event.date }} - {{ event.location }}
                                         <form method="post" action="{% url 'register_for_event' event.id %}">
                                             {% csrf_token %}
