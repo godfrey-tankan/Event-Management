@@ -55,7 +55,8 @@ def event_list(request):
         HttpResponse: HTTP response containing the list of events.
     """
     events = Event.objects.all()
-    registered_events = EventRegistration.objects.filter(user=request.user.id)
+    registered_events_list = EventRegistration.objects.filter(user=request.user)
+    registered_events = registered_events_list if registered_events_list else None
     return render(request, 'event_list.html', {'events': events, 'registered_events': registered_events})
 
 @login_required
@@ -76,11 +77,11 @@ def register_for_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     
     # Check if the user is already registered for the event
-    if EventRegistration.objects.filter(event=event, user=request.user.id).exists():
+    if EventRegistration.objects.filter(event=event, user=request.user).exists():
         messages.warning(request, 'You are already registered for this event.')
     else:
         # Add the logged-in user to the attendees of the event
-        EventRegistration.objects.create(event=event, user=request.user.id)
+        EventRegistration.objects.create(event=event, user=request.user)
         messages.success(request, 'Successfully registered for the event.')
     
     return redirect('event_list')  # Redirect to event list after registration
