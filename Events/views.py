@@ -112,6 +112,56 @@ def unregister_event(request, event_id):
     
     return redirect('event_list')
 
+@staff_member_required
+@login_required
+def delete_event(request, event_id):
+    """
+    View function for deleting an event.
+
+    Only staff members (admins) can access this view.
+
+    Parameters:
+        request (HttpRequest): The HTTP request object.
+        event_id (int): The ID of the event to delete.
+
+    Returns:
+        HttpResponse: HTTP response redirecting to the event list page after deletion.
+    """
+    event = get_object_or_404(Event, id=event_id)
+    if event:
+        event.delete()
+        messages.success(request, 'Event deleted successfully.')
+        return redirect('event_list')
+    else:
+        messages.error(request, 'Error deleting event.')
+        return redirect('event_list')
+
+
+@staff_member_required
+@login_required
+def edit_event(request, event_id):
+    """
+    View function for editing an event.
+
+    Only staff members (admins) can access this view.
+
+    Parameters:
+        request (HttpRequest): The HTTP request object.
+        event_id (int): The ID of the event to edit.
+
+    Returns:
+        HttpResponse: HTTP response containing the event edit form.
+    """
+    event = get_object_or_404(Event, id=event_id)
+    if request.method == 'POST':
+        form = EventForm(request.POST, instance=event)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Event updated successfully.')
+            return redirect('event_list')
+    else:
+        form = EventForm(instance=event)
+    return render(request, 'edit_event.html', {'form': form, 'event': event})
 
 
 
