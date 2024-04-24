@@ -7,8 +7,41 @@
     <title>Create Event</title>
     <link href="{% static "css/base.css" %}" rel="stylesheet">
     <!-- Replace 'your_css_file.css' with the path to your CSS file -->
+    <style>
+
+    .event-form {
+    max-width: 400px;
+
+    border: 1px solid #ccc;
+    padding: -20px;
+    border-radius: 5px;
+    }
+
+.event-form input[type="submit"] {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.event-form input[type="submit"]:hover {
+  background-color: #6d92b9;
+}
+
+.event-form input[type="text"],
+.event-form input[type="password"] {
+  width: 90%;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+    </style>
 </head>
 <body>
+
     <div id="header">
         <div class="logo">Your Logo</div>
         <ul class="menu">
@@ -23,12 +56,12 @@
             {% endif %}
         </div>
     </div>
-    <div id="content">
+    <div id="content" class="event-form">
         <h1>Create Event</h1>
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <button type="submit">Create Event</button>
+            <input type="submit" value="Create Event">
         </form>
     </div>
 </body>
