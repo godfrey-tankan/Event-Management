@@ -20,6 +20,7 @@ from django.views.decorators.csrf import csrf_exempt
 # import cv2
 
 @staff_member_required
+@login_required
 def create_event(request):
     """
     View function for creating an event.
@@ -42,7 +43,7 @@ def create_event(request):
     else:
         form = EventForm()
     return render(request, 'create_event.html', {'form': form})
-
+@login_required
 def event_list(request):
     """
     View function for displaying a list of events.
@@ -54,7 +55,8 @@ def event_list(request):
         HttpResponse: HTTP response containing the list of events.
     """
     events = Event.objects.all()
-    return render(request, 'event_list.html', {'events': events})
+    registered_events = EventRegistration.objects.filter(user=request.user.id)
+    return render(request, 'event_list.html', {'events': events, 'registered_events': registered_events})
 
 @login_required
 def register_for_event(request, event_id):
@@ -87,6 +89,7 @@ def register_for_event(request, event_id):
 
 
 @staff_member_required
+@login_required
 def view_event_attendees(request, event_id):
     """
     View function for viewing all users registered for an event.
@@ -106,6 +109,7 @@ def view_event_attendees(request, event_id):
 
 
 @staff_member_required
+@login_required
 def view_registered_users(request, event_id):
     """
     View function for displaying users registered for a specific event.
