@@ -6,17 +6,30 @@
   <script src="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.js"></script>
   <style>
 
+
 body {
   background-image: url("/media/background_images/scan.jpeg");
   background-repeat: no-repeat;
-  background-size: cover; 
+  background-size: cover;
+  min-height: 100vh;
+}
+
+
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); 
+  z-index: -1;
 }
 
 @media only screen and (max-width: 768px) {
   body {
-    background-size: cover; 
-  background-repeat: repeat;
-
+    background-size: cover;
+    background-repeat: repeat;
   }
 }
 
@@ -51,6 +64,9 @@ body {
       pointer-events: none;
     }
 
+    .dark-grey{
+      background-color: #c4c4c4;
+    }
     .popup {
       visibility: hidden;
       max-width: 80%;
@@ -85,9 +101,9 @@ body {
 </div>
 <div class="popup" id="popup"></div>
 <div class="prompts" style="display: flex; align-items: center; justify-content: center;" >
-<div id="messagePopup" style="color: green;"></div>
-<div id="timeTaken" style="color: green"></div>
-<div id="errorPopup" style="color: rgb(172, 15, 15);"></div>
+<div id="messagePopup" style="color: green;font-size: 20px;padding :10px;font-weight: bolder;"></div>
+<div id="timeTaken" style="color: green;font-size: 20px;padding :10px;font-weight: bolder;"></div>
+<div id="errorPopup" style="color: rgb(172, 15, 15);font-size: 20px;padding :10px;font-weight: bolder;"></div>
 </div>
 <script>
  $(document).ready(function () {
@@ -202,9 +218,11 @@ body {
             const element = document.getElementById(elementId);
             element.textContent = message;
             element.classList.add('show');
-
+            element.classList.add('dark-grey');
             setTimeout(() => {
+              element.classList.remove('dark-grey');
               element.classList.remove('show');
+              element.textContent = '';
             }, 2000);
           }
           if (response.message) {

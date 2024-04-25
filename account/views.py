@@ -6,6 +6,8 @@ from django.contrib import messages
 from .forms import LoginForm, UserRegistrationForm, \
                    UserEditForm, ProfileEditForm
 from .models import Profile
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserChangeForm
 import os
 import qrcode
 from django.conf import settings
@@ -122,25 +124,13 @@ def edit(request):
     Returns:
         HttpResponse: HTTP response containing profile editing form.
     """
+    user = User.objects.get(id=request.user.id)
     if request.method == 'POST':
-        user_form = UserEditForm(instance=request.user,
-                                 data=request.POST)
-        profile_form = ProfileEditForm(
-                                    instance=request.user.profile,
-                                    data=request.POST,
-                                    files=request.FILES)
-        if user_form.is_valid() and profile_form.is_valid():
+        user_form = UserEditForm(request.POST, instance=user)
+        if user_form.is_valid():
             user_form.save()
-            profile_form.save()
-            messages.success(request, 'Profile updated '\
-                                      'successfully')
-        else:
-            messages.error(request, 'Error updating your profile')
+            messages.success(request, 'Profile updated successfully.')
+            return redirect('dashboard')
     else:
-        user_form = UserEditForm(instance=request.user)
-        profile_form = ProfileEditForm(
-                                    instance=request.user.profile)
-    return render(request,
-                  'account/edit.html',
-                  {'user_form': user_form,
-                   'profile_form': profile_form})
+        user_form = UserEditForm(instance=user)
+    return render(request, 'account/register.html', {'user_form': user_form,"action":"edit"})

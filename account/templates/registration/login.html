@@ -4,6 +4,35 @@
 
 {% block content %}
   <h1>Log-in</h1>
+  <style>
+    body {
+    background-image: url("/media/background_images/login.jpeg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    min-height: 100vh;
+  }
+  h1,p,label{
+    color: #fff;
+  }
+  
+  body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); 
+    z-index: -1;
+  }
+  
+  @media only screen and (max-width: 768px) {
+    body {
+      background-size: cover;
+      background-repeat: repeat;
+    }
+  }
+  </style>
   {% if form.errors %}
     <!-- <p>
       Your username and password didn't match.
@@ -22,7 +51,7 @@
       <a href="{% url "password_reset" %}">
         Forgotten your password?
       </a>
-      <a href="{%url "register" %}" style="color: rgb(75, 74, 74);padding-left: 60px;text-decoration: underline;">No account?</a>
+      <a href="{%url "register" %}" style="color: rgb(255, 255, 255);padding-left: 60px;text-decoration: underline;">No account?</a>
     </p>
   </div>
 {% endblock %}

@@ -4,11 +4,31 @@
 
 {% block content %}
 <style>
+ body {
+  background-image: url("/media/background_images/runner.jpeg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  min-height: 100vh;
+}
+
+
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3); 
+  z-index: -1;
+}
+
+@media only screen and (max-width: 768px) {
   body {
-    background-image: url("/media/background_images/runner.jpeg");
-    background-repeat: no-repeat;
     background-size: cover;
+    background-repeat: repeat;
   }
+}
 
   .dashboard {
     padding-top: 10px;
