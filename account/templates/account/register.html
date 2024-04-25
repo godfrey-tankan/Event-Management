@@ -50,11 +50,21 @@
 }
 </style>
 <h1>Register</h1>
-<form method="post" action="{% url 'register' %}" class="register-form">
+{% if action %}
+<form method="post" action="{% url 'edit' %}" class="register-form">
     <h1>Create an account</h1>
     {% csrf_token %}
     {{ user_form.as_p }}
     {{ additional_fields.as_p }}
-    <p><input type="submit" value="Create my account"></p>
+    <p><input type="submit" value="Save"></p>
   </form>
+{% else %}
+<form method="post" action="{% url 'register' %}" class="register-form">
+  <h1>Create an account</h1>
+  {% csrf_token %}
+  {{ user_form.as_p }}
+  {{ additional_fields.as_p }}
+  <p><input type="submit" value="Create my account"></p>
+</form>
+{% endif %}
 {% endblock %}

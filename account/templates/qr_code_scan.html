@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mobile Scan</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.js"></script> -->
+
+  <script src="https://unpkg.com/quagga/dist/quagga.min.js"></script>
+  <style>
+ body {
+  background-image: url("/media/background_images/scan2.jpeg");
+  background-repeat: no-repeat;
+  background-size: cover; 
+}
+
+@media only screen and (max-width: 768px) {
+  body {
+    background-size: cover; 
+  background-repeat: repeat;
+
+  }
+}
+
+    #scanner-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60%;
+      height: 60%;
+      border: 1px solid #000;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #cameraCanvas {
+      width: 100%;
+      height: 100%;
+      border: 1px solid #000;
+      border-radius: 50px;
+    }
+
+    #camera-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+    }
+
+    .popup {
+      visibility: hidden;
+      max-width: 80%;
+      margin: auto;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 2px;
+      padding: 16px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+      font-size: 17px;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.5s, visibility 0.5s;
+    }
+
+    .popup.show {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+<input type="hidden" id="csrfToken" value="{% csrf_token %}">
+
+<div id="scanner-container">
+  <canvas id="cameraCanvas"></canvas>
+  <canvas id="camera-overlay"></canvas>
+</div>
+<div class="popup" id="popup"></div>
+<div class="prompts" style="display: flex; align-items: center; justify-content: center;">
+  <div id="messagePopup" style="color: green;"></div>
+  <div id="timeTaken" style="color: green"></div>
+  <div id="errorPopup" style="color: rgb(172, 15, 15);"></div>
+</div>
+<script>
+  $(document).ready(function () {
+    var canvas = document.getElementById('cameraCanvas');
+    var context = canvas.getContext('2d');
+
+    // Function to draw video frame onto the canvas
+    function drawVideoFrame(video, context, width, height) {
+      context.drawImage(video, 0, 0, width, height);
+      requestAnimationFrame(() => drawVideoFrame(video, context, width, height));
+    }
+
+    // Function to show popups
+    function showPopup(popupId, message, duration = 3000) {
+      var popup = document.getElementById(popupId);
+      popup.textContent = message;
+      popup.classList.add('show');
+      setTimeout(function () {
+        popup.classList.remove('show');
+      }, duration);
+    }
+
+    function showScanningEffect() {
+      var overlayCanvas = document.getElementById('camera-overlay');
+      var overlayContext = overlayCanvas.getContext('2d');
+      overlayContext.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+
+      var gradient = overlayContext.createLinearGradient(0, 0, overlayCanvas.width, 0);
+      gradient.addColorStop("0", "transparent");
+      gradient.addColorStop("0.5", "rgba(255, 255, 255, 0.5)");
+      gradient.addColorStop("1.0", "transparent");
+
+      var scanSpeed = 2; // Adjust the scanning speed as needed
+
+      var scanPosition = 0;
+      function animateScan() {
+        overlayContext.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        overlayContext.fillStyle = gradient;
+        overlayContext.fillRect(scanPosition, 0, scanSpeed, overlayCanvas.height);
+        scanPosition +=2;
+
+        if (scanPosition < overlayCanvas.width) {
+          requestAnimationFrame(animateScan);
+        } else {
+          scanPosition = 0;
+          requestAnimationFrame(animateScan);
+        }
+      }
+
+      animateScan();
+    }
+
+    function isMobileDevice() {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    // Initialize Quagga library
+    Quagga.init({
+      inputStream: {
+        name: "Live",
+        type: "LiveStream",
+        constraints: {
+          facingMode: isMobileDevice() ? "environment" : "user",
+        },
+        target: document.getElementById("cameraCanvas")
+      },
+      locator: {
+        patchSize: "medium",
+        halfSample: true
+      },
+      numOfWorkers: navigator.hardwareConcurrency || 1,
+      decoder: {
+        readers: ["ean_reader"]
+      },
+      locate: true
+    }, function (err) {
+      if (err) {
+        console.error(err);
+        showPopup('popup', 'Error initializing camera.');
+        return;
+      }
+
+      Quagga.start();
+
+      // Attach barcode detection event listener
+      Quagga.onDetected(function (result) {
+        var qrCodeValue = result.codeResult.code;
+        showPopup('popup', 'QR Code detected: ' + qrCodeValue);
+
+        // Send AJAX request to server with the QR code value
+        var url = window.location.href;
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+            csrfmiddlewaretoken: $('#csrfToken').val(),
+            qrCodeValue: qrCodeValue
+            },
+            success: function (response) {
+            console.log(response);
+            },
+            error: function (xhr, status, error) {
+            console.error(error);
+            }
+        });
+        });
+    });
+
+    var video = document.createElement('video');
+    navigator.mediaDevices.getUserMedia({ video: true }).then(function (stream) {
+      video.srcObject = stream;
+      video.setAttribute('playsinline', true);
+      video.play();
+      requestAnimationFrame(() => drawVideoFrame(video, context, canvas.width, canvas.height));
+      showScanningEffect();
+
+    }).catch(function (error) {
+      console.error(error);
+      showPopup('popup', 'Error accessing camera.');
+    });
+
+  });
+</script>
+</body>
+</html>

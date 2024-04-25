@@ -2,10 +2,13 @@ from django.db import models
 from django.conf import settings
 from io import BytesIO
 from django.core.files import File
-import barcode
-from barcode.writer import ImageWriter
+import qrcode
 import random
 import string
+import barcode
+from barcode.writer import ImageWriter
+
+
 
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -13,6 +16,8 @@ class Profile(models.Model):
     photo = models.ImageField(upload_to='users/%Y/%m/%d/', blank=True)
     barcode = models.ImageField(blank=True, null=True, upload_to='profile_barcodes')
     barcode_value = models.CharField(max_length=16, blank=True, null=True)
+    qr_code = models.ImageField(blank=True, null=True, upload_to='profile_qrcodes')
+    qr_code_value = models.CharField(max_length=256, blank=True, null=True)
 
     def __str__(self):
         return f'Profile of {self.user.username}'
@@ -36,5 +41,24 @@ class Profile(models.Model):
             buffer = BytesIO()
             code.write(buffer)
             self.barcode.save(f'{user_id}_barcode.png', File(buffer), save=False)
+
+        if not self.qr_code_value:
+            # Generating QR code
+            qr_code_data = f"{self.user.username}"
+            self.qr_code_value = qr_code_data
+
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=4,
+            )
+            qr.add_data(qr_code_data)
+            qr.make(fit=True)
+            qr_image = qr.make_image(fill_color="black", back_color="white")
+
+            buffer = BytesIO()
+            qr_image.save(buffer, format='PNG')
+            self.qr_code.save(f'{self.user.username}_qr_code.png', File(buffer), save=False)
 
         super().save(*args, **kwargs)
