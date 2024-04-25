@@ -8,18 +8,37 @@
   /* CSS styles */
 
   body {
-    background-repeat: no-repeat;
+  background-image: url("/media/background_images/scan.jpeg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  min-height: 100vh;
+}
+
+
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); 
+  z-index: -1;
+}
+
+@media only screen and (max-width: 768px) {
+  body {
     background-size: cover;
-    min-height: 100vh;
+    background-repeat: repeat;
   }
-
-  @media only screen and (max-width: 768px) {
-    body {
-      background-size: cover;
-      background-repeat: repeat;
-    }
-  }
-
+}
+  .dark-grey {
+  background-color: darkgrey;
+  width: max-content;
+  border: 1px solid transparent;
+  padding: 10px;
+  border-radius: 2px;
+}
   form {
     display: flex;
     align-items: center;
@@ -38,7 +57,7 @@
     border-radius: 5px;
   }
   .container{
-    margin-left: 40%;
+    margin-left: 44%;
     justify-content: center;
     align-items: center;
   }
@@ -77,29 +96,33 @@
             barcode_value: barcodeValue,
           },
           success: function (response) {
-          console.log("success resp", response); // Log the response to inspect its content
-
+// success response
           try {
             
             if (response.message) {
-              $("#message").text(response.message);
-              $("#error").text("");
-              $("#timeTaken").text("");
-            } else if (response.time_taken) {
-              $("#timeTaken").text(response.time_taken);
-              $("#message").text("");
-              $("#error").text("");
-            } else if (response.error) {
-              $("#error").text(response.error);
-              $("#message").text("");
-              $("#timeTaken").text("");
-            } else {
-              $("#error").text("");
-              $("#message").text("");
-              $("#timeTaken").text("");
-            }
+            $("#message").text(response.message);
+            $("#error").text("");
+            $("#timeTaken").text("");
+            $("#message").addClass("dark-grey"); 
+          } else if (response.time_taken) {
+            $("#timeTaken").text(response.time_taken);
+            $("#message").text("");
+            $("#error").text("");
+            $("#timeTaken").addClass("dark-grey"); 
+          } else if (response.error) {
+            $("#error").text(response.error);
+            $("#message").text("");
+            $("#timeTaken").text("");
+            $("#error").addClass("dark-grey"); 
+          } else {
+            $("#error").text("");
+            $("#message").text("");
+            $("#timeTaken").text("");
+            $("#error").removeClass("dark-grey"); 
+            $("#timeTaken").removeClass("dark-grey"); 
+            $("#message").removeClass("dark-grey"); 
+          }
           } catch (error) {
-            console.log("Error parsing JSON response:", error);
           }
         },
           error: function (xhr, status, error) {

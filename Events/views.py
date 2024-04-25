@@ -212,7 +212,7 @@ def view_registered_users(request, event_id):
 def scan_barcode(request):
     last_scan_time = request.session.get('last_scan_time')
     if last_scan_time and (timezone.now() - datetime.fromisoformat(last_scan_time)) < timedelta(seconds=3):
-        return JsonResponse({'message':"...", 'time_taken': None, 'error': None})
+        return JsonResponse({'message':None, 'time_taken': None, 'error': None})
     request.session['last_scan_time'] = timezone.now().isoformat()
     if request.method == 'POST':
         print("posted....")
@@ -235,7 +235,7 @@ def scan_barcode(request):
             else:
                 # Subsequent scan
                 if barcode_scan.time_taken:
-                    message = f'This user {barcode_data.user.username} already participated'
+                    message = f'This user {barcode_data.user.username} already participated Time taken: {barcode_scan.time_taken} seconds.'
                     time_taken = f'Time taken: {barcode_scan.time_taken} seconds.'
                     return JsonResponse({'message': message, 'time_taken': time_taken, 'error': None})
 
@@ -247,7 +247,7 @@ def scan_barcode(request):
 
                 return JsonResponse({'message': None, 'time_taken': f'Time taken: {time_taken} seconds.', 'error': None})
         else:
-            return JsonResponse({'message': None, 'time_taken': None, 'error': 'Barcode data not found in request.'})
+            return JsonResponse({'message': None, 'time_taken': None, 'error': 'Scan Only Registered Users!'})
     else:
         return render(request, 'scan.html', {'current_url': request.path})
     
