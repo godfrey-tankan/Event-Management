@@ -13,6 +13,7 @@ from datetime import datetime
 from django.http import JsonResponse
 from django.utils import timezone
 import re
+import qrcode
 from datetime import timedelta
 from django.views.decorators.csrf import csrf_exempt
 
@@ -248,6 +249,56 @@ def scan_barcode_mobile(request):
         return JsonResponse({'message': None, 'time_taken': None, 'error': None})
     request.session['last_scan_time'] = timezone.now().isoformat()
     if request.method == 'POST':
+        barcode_value = request.POST.get('barcode_value', '')
+        if re.match(r".*[a-z]$", barcode_value, re.IGNORECASE):
+            barcode_value = barcode_value[:-1]
+        barcode_data = Profile.objects.filter(barcode_value=barcode_value).first()
+        if barcode_data:
+            registered_events = EventRegistration.objects.filter(user=barcode_data.user)
+            if registered_events:
+                barcode_scan = BarcodeScan.objects.filter(user=barcode_data.user).first()
+                if barcode_scan is None:
+                    # start scan
+                    scan = BarcodeScan(user=barcode_data.user, scan_time=timezone.now())
+                    scan.save()
+                    return JsonResponse({'message': 'Race start, Please enjoy your race!', 'time_taken': None, 'error': None})
+                else:
+                    # finish scan
+                    if barcode_scan.time_taken:
+                        message = f'This user {barcode_data.user.username} already participated, Time taken: {barcode_scan.time_taken} seconds. '
+                        time_taken = f'Time taken: {barcode_scan.time_taken} seconds.'
+                        return JsonResponse({'message': message, 'time_taken': None, 'error': None})
+
+                    scan_time = timezone.now()
+                    time_taken = (scan_time - barcode_scan.scan_time).total_seconds()
+                    barcode_scan.scan_time = scan_time
+                    barcode_scan.time_taken = time_taken
+                    barcode_scan.save()
+                    return JsonResponse({'message': None, 'time_taken': f'Time taken: {time_taken} seconds.', 'error': None})
+            else:
+                return JsonResponse({'message': None, 'time_taken': None, 'error': 'User not registered for any event.'})
+        else:
+            return JsonResponse({'message': None, 'time_taken': None, 'error': 'No user Found.'})
+    else:
+        return render(request, 'mobile_scan.html')
+
+def scan_QR_code_mobile(request):
+    last_scan_time = request.session.get('last_scan_time')
+    if last_scan_time and (timezone.now() - datetime.fromisoformat(last_scan_time)) < timedelta(seconds=3):
+        return JsonResponse({'message': None, 'time_taken': None, 'error': None})
+    request.session['last_scan_time'] = timezone.now().isoformat()
+    
+    if request.method == 'POST':
+        barcode_value = request.POST.get('barcode_value', '')
+        qr_code = qrcode.QRCode()
+        qr_code.add_data(barcode_value)
+        
+        try:
+            qr_code_data = qr_code.make_image(fill_color="black", back_color="white")
+            qr_code_data.save('qr_code.png')
+        except Exception as e:
+            return JsonResponse({'message': None, 'time_taken': None, 'error': str(e)})
+        
         barcode_value = request.POST.get('barcode_value', '')
         if re.match(r".*[a-z]$", barcode_value, re.IGNORECASE):
             barcode_value = barcode_value[:-1]
