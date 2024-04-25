@@ -3,13 +3,66 @@
 {% block title %} Barcode Scanner {% endblock %}
 
 {% block content %}
+
+<style>
+  /* CSS styles */
+
+  body {
+    background-repeat: no-repeat;
+    background-size: cover;
+    min-height: 100vh;
+  }
+
+  @media only screen and (max-width: 768px) {
+    body {
+      background-size: cover;
+      background-repeat: repeat;
+    }
+  }
+
+  form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20%;
+  }
+
+  #barcodeInput {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: transparent;
+    width: 200px;
+    border-radius: 5px;
+  }
+  .container{
+    margin-left: 40%;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #message,
+  #timeTaken,
+  #error {
+    margin-bottom: 10px;
+  }
+</style>
+
 <form method="POST">
   {% csrf_token %}
   <!-- Other form fields -->
   <input type="hidden" name="current_url" value="{{ current_url }}" />
   <!-- Submit button -->
+  <input id="barcodeInput" type="text" autofocus />
 </form>
-<input id="barcodeInput" type="text" autofocus />
+<div class="container">
+<div id="message" style="color:green"></div>
+<div id="timeTaken"></div>
+<div id="error" style="color:brown;"></div>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
   $(document).ready(function () {
@@ -24,32 +77,33 @@
             barcode_value: barcodeValue,
           },
           success: function (response) {
-            console.log(response); // Log the response to inspect its content
+          console.log("success resp", response); // Log the response to inspect its content
 
-            try {
-              var jsonResponse = JSON.parse(JSON.stringify(response));
-              if (jsonResponse.message) {
-                $("#message").text(jsonResponse.message);
-              } else {
-                $("#message").text("");
-              }
-              if (jsonResponse.time_taken) {
-                $("#timeTaken").text(jsonResponse.time_taken);
-              } else {
-                $("#timeTaken").text("");
-              }
-              if (jsonResponse.error) {
-                $("#error").text(jsonResponse.error);
-              } else {
-                $("#error").text("");
-              }
-            } catch (error) {
-              console.log("Error parsing JSON response:", error);
+          try {
+            
+            if (response.message) {
+              $("#message").text(response.message);
+              $("#error").text("");
+              $("#timeTaken").text("");
+            } else if (response.time_taken) {
+              $("#timeTaken").text(response.time_taken);
+              $("#message").text("");
+              $("#error").text("");
+            } else if (response.error) {
+              $("#error").text(response.error);
+              $("#message").text("");
+              $("#timeTaken").text("");
+            } else {
+              $("#error").text("");
+              $("#message").text("");
+              $("#timeTaken").text("");
             }
-          },
+          } catch (error) {
+            console.log("Error parsing JSON response:", error);
+          }
+        },
           error: function (xhr, status, error) {
             // Handle the error response
-            console.log(error);
             $("#message").text("");
             $("#timeTaken").text("");
             $("#error").text("An error occurred while processing the request.");
@@ -58,10 +112,6 @@
       }
     });
   });
-</script> 
-
-<div id="message" style="color:green"></div>
-<div id="timeTaken"></div>
-<div id="error" style="color:brown;"></div>
+</script>
 
 {% endblock %}

@@ -210,14 +210,22 @@ def view_registered_users(request, event_id):
     return render(request, 'registered_users.html', {'event': event, 'registered_users': registered_users})
 
 def scan_barcode(request):
+    last_scan_time = request.session.get('last_scan_time')
+    if last_scan_time and (timezone.now() - datetime.fromisoformat(last_scan_time)) < timedelta(seconds=3):
+        return JsonResponse({'message':"...", 'time_taken': None, 'error': None})
+    request.session['last_scan_time'] = timezone.now().isoformat()
     if request.method == 'POST':
+        print("posted....")
         barcode_value =  request.POST.get("barcode_value")
-
-        if re.match(r".*[a-z]$", barcode_value, re.IGNORECASE):
-            barcode_value = barcode_value[:-1]
+        try:
+            if re.match(r".*[a-z]$", barcode_value, re.IGNORECASE):
+                barcode_value = barcode_value[:-1]
+        except Exception as e:
+            pass
 
         barcode_data = Profile.objects.filter(barcode_value=barcode_value).first()
         if barcode_data:
+            print("barcode_data",barcode_data)
             barcode_scan = BarcodeScan.objects.filter(user=barcode_data.user).first()
             if barcode_scan is None:
                 # First scan
