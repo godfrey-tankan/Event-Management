@@ -210,7 +210,7 @@ def view_registered_users(request, event_id):
 
 def scan_barcode(request):
     last_scan_time = request.session.get('last_scan_time')
-    if last_scan_time and (timezone.now() - datetime.fromisoformat(last_scan_time)) < timedelta(seconds=3):
+    if last_scan_time and (timezone.now() - datetime.fromisoformat(last_scan_time)) < timedelta(seconds=4):
         return JsonResponse({'message':None, 'time_taken': None, 'error': None})
     request.session['last_scan_time'] = timezone.now().isoformat()
     if request.method == 'POST':
@@ -251,7 +251,7 @@ def scan_barcode(request):
 @csrf_exempt
 def scan_barcode_mobile(request):
     last_scan_time = request.session.get('last_scan_time')
-    if last_scan_time and (timezone.now() - datetime.fromisoformat(last_scan_time)) < timedelta(seconds=3):
+    if last_scan_time and (timezone.now() - datetime.fromisoformat(last_scan_time)) < timedelta(seconds=5):
         return JsonResponse({'message': None, 'time_taken': None, 'error': None})
     request.session['last_scan_time'] = timezone.now().isoformat()
     if request.method == 'POST':
