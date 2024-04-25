@@ -4,12 +4,23 @@
   <title>Mobile Scan</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.js"></script> -->
+
+  <script src="https://unpkg.com/quagga/dist/quagga.min.js"></script>
   <style>
-    body {
-      background-image: url("/media/background_images/scan2.jpeg");
-      background-repeat: no-repeat;
-      background-size: cover;
-    }
+ body {
+  background-image: url("/media/background_images/scan2.jpeg");
+  background-repeat: no-repeat;
+  background-size: cover; 
+}
+
+@media only screen and (max-width: 768px) {
+  body {
+    background-size: cover; 
+  background-repeat: repeat;
+
+  }
+}
 
     #scanner-container {
       position: absolute;
@@ -110,14 +121,14 @@
       gradient.addColorStop("0.5", "rgba(255, 255, 255, 0.5)");
       gradient.addColorStop("1.0", "transparent");
 
-      var scanSpeed = 5; // Adjust the scanning speed as needed
+      var scanSpeed = 2; // Adjust the scanning speed as needed
 
       var scanPosition = 0;
       function animateScan() {
         overlayContext.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
         overlayContext.fillStyle = gradient;
         overlayContext.fillRect(scanPosition, 0, scanSpeed, overlayCanvas.height);
-        scanPosition +=25;
+        scanPosition +=2;
 
         if (scanPosition < overlayCanvas.width) {
           requestAnimationFrame(animateScan);
@@ -140,7 +151,7 @@
         name: "Live",
         type: "LiveStream",
         constraints: {
-          facingMode: isMobileDevice() ? "environment" : "user" // Use rear camera on mobile devices, front camera on others
+          facingMode: isMobileDevice() ? "environment" : "user",
         },
         target: document.getElementById("cameraCanvas")
       },
@@ -150,7 +161,7 @@
       },
       numOfWorkers: navigator.hardwareConcurrency || 1,
       decoder: {
-        readers: ["qrcode_reader"]
+        readers: ["ean_reader"]
       },
       locate: true
     }, function (err) {
@@ -168,23 +179,23 @@
         showPopup('popup', 'QR Code detected: ' + qrCodeValue);
 
         // Send AJAX request to server with the QR code value
-      var url = window.location.href;
+        var url = window.location.href;
 
         $.ajax({
-          url: url,
-          type: 'POST',
-          data: {
+            url: url,
+            type: 'POST',
+            data: {
             csrfmiddlewaretoken: $('#csrfToken').val(),
             qrCodeValue: qrCodeValue
-          },
-          success: function (response) {
+            },
+            success: function (response) {
             console.log(response);
-          },
-          error: function (xhr, status, error) {
+            },
+            error: function (xhr, status, error) {
             console.error(error);
-          }
+            }
         });
-      });
+        });
     });
 
     var video = document.createElement('video');
@@ -193,12 +204,13 @@
       video.setAttribute('playsinline', true);
       video.play();
       requestAnimationFrame(() => drawVideoFrame(video, context, canvas.width, canvas.height));
+      showScanningEffect();
+
     }).catch(function (error) {
       console.error(error);
       showPopup('popup', 'Error accessing camera.');
     });
 
-    showScanningEffect();
   });
 </script>
 </body>

@@ -331,4 +331,4 @@ def scan_QR_code_mobile(request):
         else:
             return JsonResponse({'message': None, 'time_taken': None, 'error': 'No user Found.'})
     else:
-        return render(request, 'mobile_scan.html')
+        return render(request, 'qr_code_scan.html')

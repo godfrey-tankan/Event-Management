@@ -29,7 +29,8 @@
     Welcome to your dashboard. You can <a href="{% url "edit" %}">edit your profile</a> or <a href="{% url "password_change" %}">change your password</a>.
   </p>
   <p>
-    You can also <a href="{% url "camera_scan_barcode" %}">scan barcode with camera</a> or use <a href="{% url "scan_barcode" %}">Barcode scanner</a> to start/finish a race.
+    <span style="font-weight: bolder;" >To start/finish a race:</span> <a href="{% url "camera_scan_barcode" %}">scan barcode with camera</a> or use <a href="{% url "scan_barcode" %}">Barcode scanner</a> Or <a href="{% url "camera_scan_qrcode" %}">scan QR code</a>
   </p>
+
 </div>
 {% endblock %}
