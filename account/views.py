@@ -61,6 +61,31 @@ def dashboard(request):
                   'account/dashboard.html',
                   {'section': 'dashboard'})
 
+@login_required
+def request_user_profile(request):
+    """
+    View function for requesting user profile.
+
+    Parameters:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        HttpResponse: HTTP response containing the user profile.
+    """
+    user = request.user
+    profile = Profile.objects.get(user=user)
+
+    # Get the URL of the QR code image
+    qr_code_url = profile.qr_code.url
+
+    # Create a response with the QR code image URL
+    response_data = {
+        'profile': profile,
+        'qr_code_url': qr_code_url,
+    }
+
+    return render(request, 'account/profile.html', response_data)
+
 
 def register(request):
     if request.method == 'POST':

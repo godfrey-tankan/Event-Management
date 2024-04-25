@@ -191,6 +191,7 @@ def view_event_attendees(request, event_id):
     return render(request, 'event_attendees.html', {'event': event, 'attendees': event})
 
 
+
 @staff_member_required
 @login_required
 def view_registered_users(request, event_id):
