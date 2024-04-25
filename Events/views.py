@@ -280,7 +280,7 @@ def scan_barcode_mobile(request):
                     barcode_scan.scan_time = scan_time
                     barcode_scan.time_taken = time_taken
                     barcode_scan.save()
-                    return JsonResponse({'message': None, 'time_taken': f'Time taken: {time_taken} seconds.', 'error': None})
+                    return JsonResponse({'message': None, 'time_taken': f'Race Finished,Time taken: {time_taken} seconds.', 'error': None})
             else:
                 return JsonResponse({'message': None, 'time_taken': None, 'error': 'User not registered for any event.'})
         else:
