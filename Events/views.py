@@ -253,24 +253,29 @@ def scan_barcode_mobile(request):
             barcode_value = barcode_value[:-1]
         barcode_data = Profile.objects.filter(barcode_value=barcode_value).first()
         if barcode_data:
-            barcode_scan = BarcodeScan.objects.filter(user=barcode_data.user).first()
-            if barcode_scan is None:
-                scan = BarcodeScan(user=barcode_data.user, scan_time=timezone.now())
-                scan.save()
-                return JsonResponse({'message': 'Race start, Please enjoy your race!', 'time_taken': None, 'error': None})
-            else:
-                # Subsequent scan
-                if barcode_scan.time_taken:
-                    message = f'This user {barcode_data.user.username} already participated, Time taken: {barcode_scan.time_taken} seconds. '
-                    time_taken = f'Time taken: {barcode_scan.time_taken} seconds.'
-                    return JsonResponse({'message': message, 'time_taken': None, 'error': None})
+            registered_events = EventRegistration.objects.filter(user=barcode_data.user)
+            if registered_events:
+                barcode_scan = BarcodeScan.objects.filter(user=barcode_data.user).first()
+                if barcode_scan is None:
+                    # start scan
+                    scan = BarcodeScan(user=barcode_data.user, scan_time=timezone.now())
+                    scan.save()
+                    return JsonResponse({'message': 'Race start, Please enjoy your race!', 'time_taken': None, 'error': None})
+                else:
+                    # finish scan
+                    if barcode_scan.time_taken:
+                        message = f'This user {barcode_data.user.username} already participated, Time taken: {barcode_scan.time_taken} seconds. '
+                        time_taken = f'Time taken: {barcode_scan.time_taken} seconds.'
+                        return JsonResponse({'message': message, 'time_taken': None, 'error': None})
 
-                scan_time = timezone.now()
-                time_taken = (scan_time - barcode_scan.scan_time).total_seconds()
-                barcode_scan.scan_time = scan_time
-                barcode_scan.time_taken = time_taken
-                barcode_scan.save()
-                return JsonResponse({'message': None, 'time_taken': f'Time taken: {time_taken} seconds.', 'error': None})
+                    scan_time = timezone.now()
+                    time_taken = (scan_time - barcode_scan.scan_time).total_seconds()
+                    barcode_scan.scan_time = scan_time
+                    barcode_scan.time_taken = time_taken
+                    barcode_scan.save()
+                    return JsonResponse({'message': None, 'time_taken': f'Time taken: {time_taken} seconds.', 'error': None})
+            else:
+                return JsonResponse({'message': None, 'time_taken': None, 'error': 'User not registered for any event.'})
         else:
             return JsonResponse({'message': None, 'time_taken': None, 'error': 'No user Found.'})
     else:
