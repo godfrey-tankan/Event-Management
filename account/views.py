@@ -75,7 +75,7 @@ def request_user_profile(request):
     user = request.user
     profile = Profile.objects.get(user=user)
 
-    qr_code_url = profile.qr_code.url
+    qr_code_url = profile.barcode.url
 
     response_data = {
         'profile': profile,
