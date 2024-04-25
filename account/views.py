@@ -75,10 +75,8 @@ def request_user_profile(request):
     user = request.user
     profile = Profile.objects.get(user=user)
 
-    # Get the URL of the QR code image
     qr_code_url = profile.qr_code.url
 
-    # Create a response with the QR code image URL
     response_data = {
         'profile': profile,
         'qr_code_url': qr_code_url,
