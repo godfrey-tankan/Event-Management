@@ -8,6 +8,7 @@ from .forms import LoginForm, UserRegistrationForm, \
 from .models import Profile
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserChangeForm
+from django.core.exceptions import ObjectDoesNotExist
 import os
 import qrcode
 from django.conf import settings
@@ -74,17 +75,21 @@ def request_user_profile(request):
     Returns:
         HttpResponse: HTTP response containing the user profile.
     """
-    user = request.user
-    profile = Profile.objects.get(user=user)
+    user = request.user.id
+    try:
+        profile = Profile.objects.get(user=user)
 
-    qr_code_url = profile.barcode.url
+        qr_code_url = profile.barcode.url
 
-    response_data = {
-        'profile': profile,
-        'qr_code_url': qr_code_url,
-    }
+        response_data = {
+            'profile': profile,
+            'qr_code_url': qr_code_url,
+        }
 
-    return render(request, 'account/profile.html', response_data)
+        return render(request, 'account/profile.html', response_data)
+    except ObjectDoesNotExist:
+        messages.error(request, 'Profile barcode does not exist')
+        return redirect('dashboard')
 
 
 def register(request):
