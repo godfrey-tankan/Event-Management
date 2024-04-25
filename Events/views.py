@@ -114,7 +114,6 @@ def unregister_event(request, event_id):
         registration.delete()
         messages.success(request, 'Successfully unregistered from the event.')
     else:
-        print("Not registered")
         messages.warning(request, 'You are not registered for this event.')
     
     return redirect('event_list')
@@ -215,7 +214,6 @@ def scan_barcode(request):
         return JsonResponse({'message':None, 'time_taken': None, 'error': None})
     request.session['last_scan_time'] = timezone.now().isoformat()
     if request.method == 'POST':
-        print("posted....")
         barcode_value =  request.POST.get("barcode_value")
         try:
             if re.match(r".*[a-z]$", barcode_value, re.IGNORECASE):
@@ -225,7 +223,6 @@ def scan_barcode(request):
 
         barcode_data = Profile.objects.filter(barcode_value=barcode_value).first()
         if barcode_data:
-            print("barcode_data",barcode_data)
             barcode_scan = BarcodeScan.objects.filter(user=barcode_data.user).first()
             if barcode_scan is None:
                 # First scan
