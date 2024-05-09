@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mobile Scan</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.js"></script>
+  <style>
+    /* CSS styles here */
+    body {
+  /* background-image: url("/media/background_images/scan.jpeg"); */
+  background-repeat: no-repeat;
+  background-size: cover;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0); 
+  z-index: -1;
+}
+
+@media only screen and (max-width: 768px) {
+  body {
+    background-size: cover;
+    background-repeat: repeat;
+  }
+}
+
+
+    
+  #scanner-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 35%;
+    height: 65%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 1px;
+    box-shadow: 0 0 2px 1px #bbbbbb;
+}
+  #cameraCanvas {
+    position: absolute;
+    top: 4%;
+    width: 90%;
+    height: 80%;
+    border: 1px solid transparent;
+    border-radius: 5px ;
+  }
+
+    #camera-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+    }
+    #stop-scanning-btn{
+      position: absolute;
+      bottom: 5%;
+      text-transform: uppercase;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .dark-grey{
+      background-color: #c4c4c4;
+    }
+    .popup {
+      visibility: hidden;
+      max-width: 80%;
+      margin: auto;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 2px;
+      padding: 16px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+      font-size: 17px;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.5s, visibility 0.5s;
+    }
+
+    .popup.show {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="scanner-container">
+    <canvas id="cameraCanvas"></canvas>
+    <input id="stop-scanning-btn" type="submit" value="Stop scanning">
+    <canvas id="camera-overlay"></canvas>
+  </div>
+  <div class="popup" id="popup"></div>
+  <div class="prompts" style="display: flex; align-items: center; justify-content: center;">
+    <div id="messagePopup" style="color: green;font-size: 20px;padding :10px;font-weight: bolder;"></div>
+    <div id="timeTaken" style="color: green;font-size: 20px;padding :10px;font-weight: bolder;"></div>
+    <div id="errorPopup" style="color: rgb(172, 15, 15);font-size: 20px;padding :10px;font-weight: bolder;"></div>
+  </div>
+  <script>
+    $(document).ready(function () {
+      var canvas = document.getElementById('cameraCanvas');
+      var context = canvas.getContext('2d');
+      var scanning = false; // Variable to track scanning state
+
+      // Function to draw video frame onto the canvas
+      function drawVideoFrame(video, context, width, height) {
+        context.drawImage(video, 0, 0, width, height);
+        requestAnimationFrame(() => drawVideoFrame(video, context, width, height));
+      }
+
+      // Function to show popups
+      function showPopup(popupId, message, duration = 3000) {
+        var popup = document.getElementById(popupId);
+        popup.textContent = message;
+        popup.classList.add('show');
+        setTimeout(function () {
+          popup.classList.remove('show');
+        }, duration);
+      }
+
+      // Function to start scanning
+      function startScanning() {
+        Quagga.start();
+        scanning = true;
+        showScanningEffect();
+        document.getElementById('stop-scanning-btn').value = 'Stop scanning';
+      }
+
+      // Function to stop scanning
+      function stopScanning() {
+        Quagga.stop();
+        scanning = false;
+        document.getElementById('stop-scanning-btn').value = 'Scan';
+      }
+
+      // Function to toggle scanning
+      function toggleScanning() {
+        if (scanning) {
+          stopScanning();
+        } else {
+          startScanning();
+        }
+      }
+
+      // Function to show scanning effect
+      function showScanningEffect() {
+        var overlayCanvas = document.getElementById('camera-overlay');
+    var overlayContext = overlayCanvas.getContext('2d');
+    overlayContext.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+    
+    var gradient = overlayContext.createLinearGradient(0, 0, overlayCanvas.width, 0);
+    gradient.addColorStop("0", "transparent");
+    gradient.addColorStop("0.5", "rgba(255, 255, 255, 0.5)");
+    gradient.addColorStop("1.0", "transparent");
+    
+    var scanSpeed = 5; // Adjust the scanning speed as needed
+    
+    var scanPosition = 0;
+    function animateScan() {
+      overlayContext.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+      overlayContext.fillStyle = gradient;
+      overlayContext.fillRect(scanPosition, 0, scanSpeed, overlayCanvas.height);
+      scanPosition += scanSpeed;
+      if (scanPosition < overlayCanvas.width) {
+        requestAnimationFrame(animateScan);
+      }
+    }
+    
+    animateScan();
+      }
+
+      // Check if the device is a mobile phone
+      function isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      }
+
+      // Determine the constraints based on the device type
+      function getVideoConstraints() {
+        if (isMobileDevice()) {
+      return { facingMode: { exact: "environment" } }; // Rear camera
+    } else {
+      return { facingMode: "user" }; // Front camera
+    }
+      }
+
+      // camera stream
+      navigator.mediaDevices.getUserMedia({ video: getVideoConstraints() })
+        .then(function (stream) {
+          const video = document.createElement('video');
+          video.srcObject = stream;
+          video.play();
+
+          video.addEventListener('play', function () {
+            drawVideoFrame(video, context, canvas.width, canvas.height);
+          });
+        })
+        .catch(function (err) {
+          console.error('An error occurred: ' + err);
+        });
+
+      // Initialize Quagga with the canvas as the target
+      Quagga.init({
+        inputStream: {
+        name: "Live",
+        type: "LiveStream",
+        constraints: getVideoConstraints(),
+        target: canvas, // Use the canvas as the target
+        },
+        decoder: {
+        readers: ["code_39_reader"],
+        },
+      }, function (err) {
+        if (err) {
+      console.error("Error initializing Quagga:", err);
+      return;
+    }
+    Quagga.start();
+
+    Quagga.onDetected(function (result) {
+      var barcodeValue = result.codeResult.code;
+      showPopup('popup', 'Barcode detected: ' + barcodeValue, 3000);
+
+      var url = window.location.href;
+      var data = { barcode: barcodeValue };
+      $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+          csrfmiddlewaretoken: $("[name=csrfmiddlewaretoken]").val(),
+          barcode_value: barcodeValue,
+        },
+        success: function (response) {
+          console.log('Success:', response);
+          function showAndHideMessage(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.classList.add('show');
+            element.classList.add('dark-grey');
+            setTimeout(() => {
+              element.classList.remove('dark-grey');
+              element.classList.remove('show');
+              element.textContent = '';
+            }, 5000);
+          }
+          if (response.message) {
+            showAndHideMessage('messagePopup', response.message);
+          }
+          else if (response.error) {
+            showAndHideMessage('errorPopup', response.error);
+          }
+          else if (response.time_taken) {
+            showAndHideMessage('timeTaken', response.time_taken);
+          }
+        },
+        error: function (error) {
+          console.error('Error:', error);
+          // Handle the error here
+        }
+      });
+      showScanningEffect();
+    });
+        document.getElementById('stop-scanning-btn').addEventListener('click', toggleScanning);
+      });
+    });
+  </script>
+</body>
+</html>
