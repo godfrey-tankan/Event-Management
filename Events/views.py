@@ -217,7 +217,7 @@ def scan_barcode(request):
         barcode_value =  request.POST.get("barcode_value")
         try:
             if re.match(r".*[a-z]$", barcode_value, re.IGNORECASE):
-                barcode_value = barcode_value[:-1]
+                barcode_value = re.sub(r'\D', '', barcode_value)
         except Exception as e:
             pass
 
