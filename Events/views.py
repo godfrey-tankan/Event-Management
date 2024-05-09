@@ -214,12 +214,12 @@ def scan_barcode(request):
         return JsonResponse({'message':None, 'time_taken': None, 'error': None})
     request.session['last_scan_time'] = timezone.now().isoformat()
     if request.method == 'POST':
-        barcode_value =  request.POST.get("barcode_value")
+        barcode_value_ob =  request.POST.get("barcode_value")
         try:
-            barcode_value = ''.join(filter(str.isdigit, barcode_value))
+            barcode_value = ''.join(filter(str.isdigit, barcode_value_ob))
         except Exception as e:
             pass
-
+        print("barcode vale is:",barcode_value)
         barcode_data = Profile.objects.filter(barcode_value=barcode_value).first()
         if barcode_data:
             barcode_scan = BarcodeScan.objects.filter(user=barcode_data.user).first()
