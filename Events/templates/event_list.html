@@ -1,282 +1,185 @@
 {% load static %}
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Event List</title>
-    <link href="{% static "css/base.css" %}" rel="stylesheet">
-    <!-- Replace 'your_css_file.css' with the path to your CSS file -->
+    <link href="{% static 'css/base.css' %}" rel="stylesheet">
+    <!-- Add Bootstrap CSS link -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* CSS styles for the buttons */
-        .search-event{
-            width: 20%;
+        /* Your existing CSS styles */
+        .search-event {
+            width: 100%;
             padding: 10px;
             border-radius: 5px;
-            margin-left: 75%;
-            margin-top: 1%;
+            margin-bottom: 20px;
         }
-        .register-button {
-            background-color: #4CAF50; /* Green */
-            border: none;
-            color: white;
-            padding: 8px 10px;
-            text-align: center; 
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            transition-duration: 0.4s;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .deregister-button {
-            background-color: #e93131; /* Green */
-            border: none;
-            color: white;
-            padding: 8px 10px;
+        .event-list-heading {
             text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            transition-duration: 0.4s;
-            cursor: pointer;
-            border-radius: 5px;
+            margin-bottom: 20px;
         }
-        h1 {
-            border-bottom: none;
-        }
-        .event {
-            font-weight: bold;
-        }
-        .admin-events .events-list .creator-events {
-            margin-bottom: 40px;
-        }
-        .admin-events {
-            position: fixed;
-            margin-top: 5%;
-        }
-
-        .register-button:hover {
-            background-color: #45a049; /* Darker Green */
-        }
-
-        .view-users-button {
-            background-color: #45a049; /* green */
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            transition-duration: 0.4s;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .event-list-heading{
-            display: flex;
-            justify-content: center;
-            position: fixed;
-        }
-        .delete-button {
-            background-color: #ff0000; /* red */
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            transition-duration: 0.4s;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .edit-button {
-            background-color: #007bff; /* blue */
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            transition-duration: 0.4s;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        .view-users-button:hover {
-            background-color: #0056b3; /* Darker Blue */
+        .card-img-top {
+            width: 100%;
+            height: 200px; /* Adjust height as needed */
+            object-fit: cover;
         }
     </style>
-
 </head>
 <body>
-    <div id="header">
-        <div class="logo">Your Logo</div>
-        <ul class="menu">
-            <li><a href="{% url 'create_event' %}">Create Event</a></li>
-            <!-- Add more menu items as needed -->
-        </ul>
-        <div class="user">
-            {% if user.is_authenticated %}
-                Welcome, {{ user.username }} | <a href="{% url 'logout' %}">Logout</a>
-            {% else %}
-                <a href="{% url 'login' %}">Login</a> | <a href="{% url 'register' %}">Register</a>
-            {% endif %}
+    <!-- Replace existing header with new Bootstrap navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Your Logo</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Link</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Dropdown
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#">Action</a>
+                        <a class="dropdown-item" href="#">Another action</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">Something else here</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+                </li>
+            </ul>
+            <form class="form-inline my-2 my-lg-0">
+                <input class="form-control mr-sm-2 search-event" type="search" placeholder="Search event by name/location here!" aria-label="Search">
+            </form>
+            <div class="user">
+                {% if user.is_authenticated %}
+                    Welcome, {{ user.username }} | <a href="{% url 'logout' %}">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}">Login</a> | <a href="{% url 'register' %}">Register</a>
+                {% endif %}
+            </div>
         </div>
-    </div>
-    <div id="content">
+    </nav>
+
+    <div id="content" class="container">
         {% if messages %}
             <ul class="messages">
                 {% for message in messages %}
                     {% if message.tags == 'success' %}
-                        <li class="success">{{ message }}</li>
+                        <li class="alert alert-success">{{ message }}</li>
                     {% elif message.tags == 'error' %}
-                        <li class="error">{{ message }}</li>
+                        <li class="alert alert-danger">{{ message }}</li>
                     {% endif %}
                 {% endfor %}
             </ul>
         {% endif %}
 
-        <input class="search-event" type="search" placeholder="Search event by name/location here!" oninput="searchEvents(this.value)">
         <h1 class="event-list-heading">Event List</h1>
-        <ul class="admin-events">
-            <!-- {% if search_results  %}
-                {% for event in search_results %}
-                    {% if user.is_authenticated and user.is_staff %}
-                        <li class="events-list">
-                            <form method="post" action="{% url 'register_for_event' event.id %}" class="creator-events">
-                                <span class="event">Event Name:</span> {{ event.name }} - <span class="event">Date:</span> {{ event.date }} - <span class="event">Location:</span> {{ event.location }}
-                                {% csrf_token %}
-                                {% if user.is_authenticated and not user.is_staff %}
-                                    <button type="submit" class="register-button">Register</button>
-                                {% endif %}
-                                <div class="actions">
-                                    <a href="{% url 'view_registered_users' event.id %}" class="view-users-button">View Registered Users</a>
-                                    <a href="{% url 'edit_event' event.id %}" class="edit-button">Edit</a>
-                                    <a href="{% url 'delete_event' event.id %}" class="delete-button">Delete</a>
-                                </div>
-                            </form>
-                        </li>
-                    {% else %}
-                        {% if user.is_authenticated %}
-                            {% for registered_event in registered_events %}
-                                {% if registered_event and event.id == registered_event.id %}
-                                    <li class="events-list">
-                                        <form method="post" action="{% url 'register_for_event' event.id %}">
-                                            <span class="event">Event Name:</span> {{ event.name }} - <span class="event">Date:</span> {{ event.date }} - <span class="event">Location:</span> {{ event.location }}
-                                            {% csrf_token %}
-                                            <input type="hidden" name="user_id" value="{{ user.id }}">
-                                            <button type="submit" class="deregister-button">De-register</button>
-                                        </form>
-                                    </li>
-                                {% endif %}
-                            {% endfor %}
-                        {% else %}
-                            <li class="events-list">
-                                <form method="post" action="{% url 'register_for_event' event.id %}">
-                                    <span class="event">Event Name:</span> {{ event.name }} - <span class="event">Date:</span> {{ event.date }} - <span class="event">Location:</span> {{ event.location }}
-                                    {% csrf_token %}
-                                    <input type="hidden" name="user_id" value="{{ user.id }}">
-                                    <button type="submit" class="register-button">Register</button>
-                                </form>
-                            </li>
-                        {% endif %}
-                    {% endif %}
-                {% endfor %}
-            {% else %} -->
+
+        <div class="row">
             {% for event in events %}
-            {% if user.is_authenticated and user.is_staff %}
-            <li class="events-list">
-                <form method="post" action="{% url 'register_for_event' event.id %}" class="creator-events">
-                    <span class="event">Event Name:</span> {{ event.name }} - <span class="event">Date:</span> {{ event.date }} - <span class="event">Location:</span> {{ event.location }}
-                    {% csrf_token %}
-                   
-                    <div class="actions">
-                        <a href="{% url 'view_registered_users' event.id %}" class="view-users-button">View Registered Users</a>
-                        <a href="{% url 'edit_event' event.id %}" class="edit-button">Edit</a>
-                        <a href="{% url 'delete_event' event.id %}" class="delete-button">Delete</a>
+                <div class="col-md-4 mb-3 card event-card" data-name="{{ event.name|lower }}" data-location="{{ event.location|lower }}">
+                    <div class="card">
+                        {% if event.img %}
+                            <!-- Display event image if available -->
+                            <img class="card-img-top" src="{{ event.img.url }}" alt="{{ event.name }}">
+                        {% else %}
+                            <!-- Default image if no event image is available -->
+                            <img class="card-img-top" src="{% static 'images/default_event_image.jpg' %}" alt="Default Image">
+                        {% endif %}
+
+                        <div class="card-body">
+                            <h5 class="card-title">{{ event.name }}</h5>
+                            <p class="card-text">
+                                <strong>Date:</strong> {{ event.date }}<br>
+                                <strong>Location:</strong> {{ event.location }}
+                            </p>
+                            <form method="post" action="{% url 'register_for_event' event.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+                                {% if user.is_authenticated and user.is_staff %}
+                                    <a href="{% url 'view_registered_users' event.id %}" class="btn btn-primary">View Registered Users</a>
+                                    <a href="{% url 'edit_event' event.id %}" class="btn btn-info">Edit</a>
+                                    <a href="{% url 'delete_event' event.id %}" class="btn btn-danger">Delete</a>
+                                {% else %}
+                                    {% if event.id in registered_events_id_list %}
+                                        <button type="submit" class="btn btn-danger">De-register</button>
+                                    {% else %}
+                                        <button type="submit" class="btn btn-success">Register</button>
+                                    {% endif %}
+                                {% endif %}
+                            </form>
+                        </div>
                     </div>
-                </form>
-            </li>
-            {% else %}
-    {% if user.is_authenticated %}
-        {% if registered_events_id_list %}
-            {% for registered_events_id in registered_events_id_list %}
-                {% if registered_events_id == event.id %}
-                    <li class="events-list">
-                        <form method="post" action="{% url 'unregister_event' event.id %}">
-                            <span class="event">Event Name:</span> {{ event.name }} - <span class="event">Date:</span> {{ event.date }} - <span class="event">Location:</span> {{ event.location }}
-                            {% csrf_token %}
-                            <input type="hidden" name="user_id" value="{{ user.id }}">
-                            <button type="submit" class="deregister-button">De-register</button>
-                        </form>
-                    </li>
-            {% else %}
-
-
-                <li class="events-list">
-                    <form method="post" action="{% url 'register_for_event' event.id %}">
-                        <span class="event">Event Name1:</span> {{ event.name }} - <span class="event">Date:</span> {{ event.date }} - <span class="event">Location:</span> {{ event.location }}
-                        {% csrf_token %}
-                        <input type="hidden" name="user_id" value="{{ user.id }}">
-                        <button type="submit" class="register-button">Register</button>
-                    </form>
-                </li>
-                {% endif %}
-                {% endfor %}
-            {% else %}
-            <li class="events-list">
-                <form method="post" action="{% url 'register_for_event' event.id %}">
-                    <span class="event">Event Name:</span> {{ event.name }} - <span class="event">Date:</span> {{ event.date }} - <span class="event">Location:</span> {{ event.location }}
-                    {% csrf_token %}
-                    <input type="hidden" name="user_id" value="{{ user.id }}">
-                    <button type="submit" class="register-button">Register</button>
-                </form>
-            </li>
-    {% endif %}
-{% endif %}
-                {% endif %}
-    {% endfor %}
-            {% endif %}
-        </ul>
+                </div>
+            {% endfor %}
+        </div>
     </div>
+
+    <!-- Add Bootstrap JS (optional, if needed) -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+
+
+
+
     <script>
-        function searchEvents(searchText) {
-            var events = document.getElementsByClassName('events-list');
-            var searchResults = searchText.trim().toLowerCase().split(' ');
-            var foundEvents = [];
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('.search-event');
+            const form = document.createElement('form');
+            form.classList.add('form-inline', 'my-2', 'my-lg-0');
     
-            for (var i = 0; i < events.length; i++) {
-                var event = events[i];
-                var eventDetails = event.innerText.toLowerCase();
-                var showEvent = false;
+            const inputGroup = document.createElement('div');
+            inputGroup.classList.add('input-group');
     
-                for (var j = 0; j < searchResults.length; j++) {
-                    var searchTerm = searchResults[j];
-                    if (eventDetails.includes(searchTerm)) {
-                        showEvent = true;
-                        break;
+            const input = document.createElement('input');
+            input.classList.add('form-control', 'mr-sm-2');
+            input.setAttribute('type', 'search');
+            input.setAttribute('placeholder', 'Search');
+            inputGroup.appendChild(input);
+    
+            const button = document.createElement('button');
+            button.classList.add('btn', 'btn-outline-success', 'my-2', 'my-sm-0');
+            button.setAttribute('type', 'submit');
+            button.textContent = 'Search';
+            inputGroup.appendChild(button);
+    
+            form.appendChild(inputGroup);
+    
+            searchInput.parentNode.replaceChild(form, searchInput);
+    
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const searchText = input.value.trim().toLowerCase();
+    
+                const eventCards = document.querySelectorAll('.event-card');
+    
+                eventCards.forEach(function(card) {
+                    const name = card.dataset.name;
+                    const location = card.dataset.location;
+                    const cardElement = card.closest('.card');
+    
+                    if (name.includes(searchText) || location.includes(searchText)) {
+                        cardElement.style.display = 'block';
+                    } else {
+                        cardElement.style.display = 'none';
                     }
-                }
-    
-                event.style.display = showEvent ? 'block' : 'none';
-    
-                if (showEvent) {
-                    foundEvents.push(event);
-                }
-            }
-    
-            var noMatchMessage = document.getElementById('no-match-message');
-            noMatchMessage.style.display = foundEvents.length > 0 ? 'none' : 'block';
-        }
+                });
+            });
+        });
     </script>
+    
+
 </body>
 </html>

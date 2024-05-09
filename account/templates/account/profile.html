@@ -1,50 +1,91 @@
-<!-- profile.html -->
-<style>
-    body {
-  background-image: url("/media/background_images/runner.jpeg");
-  background-repeat: no-repeat;
-  background-size: cover;
-  overflow: hidden;
-  min-height: 100vh;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student ID</title>
+    <style>
+        body {
+            background-color: #f8f9fa; /* Set a light background color */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333; /* Set a dark text color */
+        }
 
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
 
-body::after {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); 
-  z-index: -1;
-}
+        .card {
+            width: 100%;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            overflow: hidden; /* Ensure contents do not overflow */
+        }
 
-@media only screen and (max-width: 768px) {
-  body {
-    background-size: cover;
-    background-repeat: repeat;
-  }
-}
-    .image-container {
-        
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-  
-    .image-container img {
-        border: 1px solid #4b4b4b;
-        border-radius: 10px;
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
-  </style>
-  
-  <h1 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;"><span style="color:#12c064;">My</span> Profile</h1>
-  <!-- Display other profile information -->
-  <div class="image-container">
-    <img src="{{ qr_code_url }}" alt="QR Code">
-  </div>
+        .card-img-top {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        h5.card-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        p.card-text {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .student-info {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .qr-code {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            margin-top: 20px;
+        }
+
+        .btn-primary {
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <img class="card-img-top" src="{{ qr_code_url }}" alt="QR Code">
+            <div class="card-body">
+                <h5 class="card-title">Student ID</h5>
+                <div class="student-info">
+                    <div>
+                        <p class="card-text"><strong>Name:</strong> John Doe</p>
+                        <p class="card-text"><strong>Age:</strong> 21</p>
+                        <p class="card-text"><strong>Details:</strong> Course: Computer Science, Year: 3</p>
+                    </div>
+                    <img class="qr-code" src="{{ qr_code_url }}" alt="QR Code">
+                </div>
+                <a href="#" class="btn btn-primary">View Profile</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -8,6 +8,7 @@ class Event(models.Model):
     date = models.DateField()
     location = models.CharField(max_length=255)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    img = models.ImageField(upload_to='event_images/', null=True, blank=True) 
     def __str__(self):
         return self.name
 
