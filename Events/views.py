@@ -216,7 +216,7 @@ def scan_barcode(request):
     if request.method == 'POST':
         barcode_value =  request.POST.get("barcode_value")
         try:
-            barcode_value = re.sub(r'\D', '', barcode_value)
+            barcode_value = ''.join(filter(str.isdigit, barcode_value))
         except Exception as e:
             pass
 
