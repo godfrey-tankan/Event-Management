@@ -254,9 +254,11 @@ def scan_barcode_mobile(request):
         return JsonResponse({'message': None, 'time_taken': None, 'error': None})
     request.session['last_scan_time'] = timezone.now().isoformat()
     if request.method == 'POST':
-        barcode_value = request.POST.get('barcode_value', '')
-        if re.match(r".*[a-z]$", barcode_value, re.IGNORECASE):
-            barcode_value = barcode_value[:-1]
+        barcode_value_ob =  request.POST.get("barcode_value")
+        try:
+            barcode_value = ''.join(filter(str.isdigit, barcode_value_ob))
+        except Exception as e:
+            pass
         barcode_data = Profile.objects.filter(barcode_value=barcode_value).first()
         if barcode_data:
             registered_events = EventRegistration.objects.filter(user=barcode_data.user)
