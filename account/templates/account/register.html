@@ -1,69 +1,142 @@
+{% load static %}
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration Form</title>
+    <title>Register your new Account</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
         }
         .container {
             max-width: 500px;
-            margin: 100px auto;
+            margin: 50px auto;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background-color: #fff;
         }
-        .form-group label {
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #28a745;
+        }
+        label {
             font-weight: bold;
         }
-        .btn-primary {
-            background-color: #007bff;
+        .form-control {
+            border-radius: 4px;
+            box-shadow: none;
+        }
+        .btn-success {
+            background-color: #28a745;
             border: none;
             padding: 12px 20px;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            width: 100%;
         }
-        .btn-primary:hover {
-            background-color: #0056b3;
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        .form-group {
+            margin-bottom: 20px;
         }
     </style>
 </head>
+
+
+ <!-- Bootstrap Navbar with Full-width Container -->
+ <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid"> <!-- Use container-fluid for full-width -->
+        <a class="navbar-brand" href="#">OCR</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        {% if request.user.is_authenticated %}
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto"> <!-- Align menu items to the left -->
+                <li class="nav-item active">
+                    <a class="nav-link" href="{% url "dashboard" %}">My Dashboard <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url "event_list" %}">Events</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">People</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url "request_user_profile" %}">My Profile</a>
+                </li>
+            </ul>
+            {% endif %}
+            {% if request.user.is_authenticated %}
+                <!-- User is authenticated: Display greeting and logout button -->
+                <span class="navbar-text mr-3">
+                    Hello {{ request.user.first_name|default:request.user.username }},
+                </span>
+                <ul class="navbar-nav ml-auto"> <!-- Align login button to the right -->
+                    <li class="nav-item">
+                        <form action="{% url 'logout' %}" method="post">
+                            <button type="submit" class="btn btn-login">Logout</button>
+                        </form>
+                    </li>
+                </ul>
+            {% else %}
+                <!-- User is not authenticated: Display login button -->
+                <ul class="navbar-nav ml-auto"> <!-- Align login button to the right -->
+                    <li class="nav-item">
+                        <a href="{% url "login" %}" class="btn btn-login">Log-in</a>
+                    </li>
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+
 <body>
     <div class="container">
-        <h2 class="text-center mb-4">Registration Form</h2>
-        <form>
+        <h2>Create an Account</h2>
+        <form method="post" action="{% url 'register' %}">
+            {% csrf_token %}
+
             <div class="form-group">
-                <label for="firstName">First Name</label>
-                <input type="text" class="form-control" id="firstName" placeholder="Enter your first name">
+                <label for="id_username">Username</label>
+                <input type="text" class="form-control" id="id_username" name="username" placeholder="Enter username" required>
             </div>
+
             <div class="form-group">
-                <label for="lastName">Last Name</label>
-                <input type="text" class="form-control" id="lastName" placeholder="Enter your last name">
+                <label for="id_first_name">First Name</label>
+                <input type="text" class="form-control" id="id_first_name" name="first_name" placeholder="Enter your first name" required>
             </div>
+
             <div class="form-group">
-                <label for="emailAddress">Email</label>
-                <input type="email" class="form-control" id="emailAddress" placeholder="Enter your email address">
+                <label for="id_email">Email</label>
+                <input type="email" class="form-control" id="id_email" name="email" placeholder="Enter your email address" required>
             </div>
+
             <div class="form-group">
-                <label for="phoneNumber">Phone Number</label>
-                <input type="tel" class="form-control" id="phoneNumber" placeholder="Enter your phone number">
+                <label for="id_password">Password</label>
+                <input type="password" class="form-control" id="id_password" name="password" placeholder="Enter password" required>
             </div>
+
             <div class="form-group">
-                <label for="gender">Gender</label>
-                <select class="form-control" id="gender">
-                    <option value="female">Female</option>
-                    <option value="male">Male</option>
-                    <option value="other">Other</option>
-                </select>
+                <label for="id_password2">Repeat Password</label>
+                <input type="password" class="form-control" id="id_password2" name="password2" placeholder="Repeat password" required>
             </div>
-            <button type="submit" class="btn btn-primary btn-block mt-4">Submit</button>
+
+            <button type="submit" class="btn btn-success">Create Account</button>
         </form>
     </div>
 
+    <!-- Bootstrap JS dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

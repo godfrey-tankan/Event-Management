@@ -1,11 +1,107 @@
-{% extends "base.html" %}
+{% load static %}
+<html>
+  <head>
+    <link href="https://fonts.googleapis.com/css?family=Nunito+Sans:400,400i,700,900&display=swap" rel="stylesheet">
 
-{% block title %}Welcome{% endblock %}
+    <title>Register your new Account</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
-{% block content %}
-  <h1>Welcome {{ new_user.first_name }}!</h1>
-  <p>
-    Your account has been successfully created.
-    Now you can <a href="{% url "login" %}">log in</a>.
-  </p>
-{% endblock %}
+    
+  </head>
+
+ 
+
+    <style>
+      body {
+        text-align: center;
+        padding: 40px 0;
+        background: #EBF0F5;
+      }
+        h1 {
+          color:  #28a745;
+          font-family: "Nunito Sans", "Helvetica Neue", sans-serif;
+          font-weight: 900;
+          font-size: 40px;
+          margin-bottom: 10px;
+        }
+        p {
+          color: #404F5E;
+          font-family: "Nunito Sans", "Helvetica Neue", sans-serif;
+          font-size:20px;
+          margin: 0;
+        }
+      i {
+        color: #28a745;
+        font-size: 100px;
+        line-height: 200px;
+        margin-left:-15px;
+      }
+      .card {
+        background: white;
+        padding: 60px;
+        border-radius: 4px;
+        box-shadow: 0 2px 3px #C8D0D8;
+        display: inline-block;
+        margin: 0 auto;
+      }
+    </style>
+
+
+    <body>
+       <!-- Bootstrap Navbar with Full-width Container -->
+ <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid"> <!-- Use container-fluid for full-width -->
+      <a class="navbar-brand" href="#">OCR</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+      </button>
+      {% if request.user.is_authenticated %}
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav mr-auto"> <!-- Align menu items to the left -->
+              <li class="nav-item active">
+                  <a class="nav-link" href="{% url "dashboard" %}">My Dashboard <span class="sr-only">(current)</span></a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" href="{% url "event_list" %}">Events</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" href="#">People</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" href="{% url "request_user_profile" %}">My Profile</a>
+              </li>
+          </ul>
+          {% endif %}
+          {% if request.user.is_authenticated %}
+              <!-- User is authenticated: Display greeting and logout button -->
+              <span class="navbar-text mr-3">
+                  Hello {{ request.user.first_name|default:request.user.username }},
+              </span>
+              <ul class="navbar-nav ml-auto"> <!-- Align login button to the right -->
+                  <li class="nav-item">
+                      <form action="{% url 'logout' %}" method="post">
+                          <button type="submit" class="btn btn-login">Logout</button>
+                      </form>
+                  </li>
+              </ul>
+          {% else %}
+              <!-- User is not authenticated: Display login button -->
+              <ul class="navbar-nav ml-auto"> <!-- Align login button to the right -->
+                  <li class="nav-item">
+                      <a href="{% url "login" %}" class="btn btn-login">Log-in</a>
+                  </li>
+              </ul>
+          {% endif %}
+      </div>
+  </div>
+</nav>
+    
+      <div class="card">
+      <div style="border-radius:200px; height:200px; width:200px; background: #F8FAF5; margin:0 auto;">
+        <i class="checkmark">✓</i>
+      </div>
+      <h1>Account Created Successfully</h1>
+      <p>Congratulations! Your account has been successfully created.</p>
+      </div>
+    </body>
+</html>
