@@ -219,7 +219,6 @@ def scan_barcode(request):
             barcode_value = ''.join(filter(str.isdigit, barcode_value_ob))
         except Exception as e:
             pass
-        print("barcode vale is:",barcode_value)
         barcode_data = Profile.objects.filter(barcode_value=barcode_value).first()
         if barcode_data:
             barcode_scan = BarcodeScan.objects.filter(user=barcode_data.user).first()
