@@ -1,57 +1,13 @@
-{% load static %}
+{% extends "base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Registered Users for {{ event.name }}</title>
-    <link href="{% static "css/base.css" %}" rel="stylesheet">
-    <!-- Replace 'your_css_file.css' with the path to your CSS file -->
-    <style>
-        /* CSS styles for the table */
-        table {
-            border-collapse: collapse;
-            width: 100%;
-        }
+{% block title %}Dashboard{% endblock %}
 
-        th, td {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        tr:hover {
-            background-color: #ddd;
-        }
-    </style>
-</head>
-<body>
-    <div id="header">
-        <div class="logo">Your Logo</div>
-        <ul class="menu">
-            <li><a href="{% url 'event_list' %}">Event List</a></li>
-            <!-- Add more menu items as needed -->
-        </ul>
-        <div class="user">
-            {% if user.is_authenticated %}
-                Welcome, {{ user.username }} | <a href="{% url 'logout' %}">Logout</a>
-            {% else %}
-                <a href="{% url 'login' %}">Login</a> | <a href="{% url 'register' %}">Register</a>
-            {% endif %}
-        </div>
-    </div>
-    <div id="content">
-        <h1>Registered Users for {{ event.name }}</h1>
-        <table>
-            <thead>
+{% block content %}
+<div class="container mt-5" style="max-width: 80%;">
+    <h1 class="text-center mb-4">Registered Users for {{ event.name }}</h1>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="thead-light">
                 <tr>
                     <th>Username</th>
                     <th>Email</th>
@@ -69,5 +25,22 @@
             </tbody>
         </table>
     </div>
-</body>
-</html>
+</div>
+
+<style>
+    /* Additional custom styles */
+    h1 {
+        font-size: 2rem;
+        color: #343a40;
+    }
+    .table {
+        margin-top: 20px;
+    }
+    .table th, .table td {
+        vertical-align: middle;
+    }
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}
