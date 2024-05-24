@@ -1,131 +1,138 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>{% block title %}{% endblock %}</title>
-  <link href="{% static "css/base.css" %}" rel="stylesheet">
-  <style>
-
-    .login-form {
-  max-width: 400px;
-  margin: 0 auto;
-  margin-left: 40%;
-  justify-content: center;
-  align-items: center;
-  border: 1px solid #ccc;
-  padding: 20px;
-  border-radius: 5px;
-}
-
-.login-form input[type="submit"] {
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.login-form input[type="submit"]:hover {
-  background-color: #376ca5;
-}
-
-.login-form input[type="text"],
-.login-form input[type="password"] {
-  width: 90%;
-  padding: 10px;
-  margin-bottom: 10px;
-}
-
-.login-form input[type="password"] {
-  position: relative;
-}
-
-.login-form input[type="password"] ~ .password-toggle {
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
-  cursor: pointer;
-}
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  .login-form .fade-enter {
-    opacity: 0;
-  }
-
-  .login-form .fade-enter-active {
-    opacity: 1;
-    animation: fadeIn 0.5s;
-  }
-  </style>
-  <script src="{% static 'js/jquery.min.js' %}"></script>
-  <script>
-    // Retrieve and set the CSRF token for AJAX requests
-    var csrftoken = "{{ csrf_token }}";
-    function csrfSafeMethod(method) {
-      // These HTTP methods do not require CSRF protection
-      return /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
-    }
-    $.ajaxSetup({
-      beforeSend: function(xhr, settings) {
-        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-          xhr.setRequestHeader("X-CSRFToken", csrftoken);
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static "css/base.css" %}" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
         }
-      }
-    });
-  </script>
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            border-radius: 8px;
+            background-color: #fff;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #28a745;
+        }
+        label {
+            font-weight: bold;
+        }
+        .form-control {
+            border-radius: 4px;
+            box-shadow: none;
+        }
+        .btn-success {
+            background-color: #28a745;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .navbar-text, .navbar-nav {
+            display: flex;
+            align-items: center;
+        }
+    </style>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script>
+        var csrftoken = "{{ csrf_token }}";
+        function csrfSafeMethod(method) {
+            return /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
+        }
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+    </script>
 </head>
 <body>
-  <div id="header">
-    <span class="logo">Event-Management-System</span>
-    {% if request.user.is_authenticated %}
-      <ul class="menu">
-        <li {% if section == "dashboard" %}class="selected"{% endif %}>
-          <a href="{% url "dashboard" %}">My dashboard</a>
-        </li>
-        <li {% if section == "images" %}class="selected"{% endif %}>
-          <a href="{% url "event_list" %}">Events</a>
-        </li>
-        <li {% if section == "people" %}class="selected"{% endif %}>
-          <a href="#">People</a>
-        </li>
-        <li {% if section == "MyProfile" %}class="selected"{% endif %}>
-        <a href="{% url "request_user_profile" %}">MyProfile</a>
-        </li>
-      </ul>
-    {% endif %}
-    <span class="user">
-      {% if request.user.is_authenticated %}
-        Hello {{ request.user.first_name|default:request.user.username }},
-        <a href="{% url "logout" %}">Logout</a>
-      {% else %}
-        <a href="{% url "login" %}">Log-in</a>
-      {% endif %}
-    </span>
-  </div>
-  {% if messages %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">OCR</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                {% if request.user.is_authenticated %}
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item {% if section == "dashboard" %}active{% endif %}">
+                        <a class="nav-link" href="{% url "dashboard" %}">Home <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item {% if section == "images" %}active{% endif %}">
+                        <a class="nav-link" href="{% url "event_list" %}">Events</a>
+                    </li>
+                    <li class="nav-item {% if section == "people" %}active{% endif %}">
+                        <a class="nav-link" href="#">People</a>
+                    </li>
+
+                    <li class="nav-item {% if section == "MyProfile" %}active{% endif %}">
+                      <a class="nav-link" href="{% url "request_user_profile" %}">About</a>
+                  </li>
+
+                    <li class="nav-item {% if section == "MyProfile" %}active{% endif %}">
+                        <a class="nav-link" href="{% url "request_user_profile" %}">Account</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <span class="navbar-text mr-3">
+                        Hello {{ request.user.first_name|default:request.user.username }},
+                    </span>
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <form action="{% url 'logout' %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-login">Logout</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+                {% else %}
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a href="{% url "login" %}" class="btn btn-login">Log-in</a>
+                    </li>
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    {% if messages %}
     <ul class="messages">
-      {% for message in messages %}
+        {% for message in messages %}
         <li class="{{ message.tags }}">
-          {{ message|safe }}
-          <a href="#" class="close">x</a>
+            {{ message|safe }}
+            <a href="#" class="close">x</a>
         </li>
-      {% endfor %}
+        {% endfor %}
     </ul>
-  {% endif %}
-  <div id="content">
-    {% block content %}
-    {% endblock %}
-  </div>
+    {% endif %}
+    
+    <div id="content">
+        {% block content %}
+        {% endblock %}
+    </div>
 </body>
 </html>
