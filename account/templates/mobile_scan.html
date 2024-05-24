@@ -1,3 +1,12 @@
+
+
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}  
+  
+  
   <!DOCTYPE html>
   <html>
   <head>
@@ -7,13 +16,13 @@
     <style>
       /* CSS styles here */
       body {
-    /* background-image: url("/media/background_images/scan.jpeg"); */
-    background-repeat: no-repeat;
-    background-size: cover;
-    min-height: 100vh;
-    overflow: hidden;
-  }
-
+        background-image: url("/media/background_images/runner.jpeg");
+        background-repeat: no-repeat;
+        background-size: cover;
+        min-height: 100vh;
+        overflow: hidden;
+        position: relative; /* Ensure relative positioning for pseudo-element */
+      }
 
   body::after {
     content: "";
@@ -309,3 +318,6 @@
     </script>
   </body>
   </html>
+
+
+  {% endblock %}
