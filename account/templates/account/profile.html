@@ -1,119 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile Details</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f5f5f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
+{% extends "base.html" %}
 
-        .card {
-            width: 320px;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-        }
+{% block title %}Dashboard{% endblock %}
 
-        .card-header {
-            background-color: #1cdf78;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            border-bottom: 2px solid #1cdf78;
-        }
-
-        .card-body {
-            padding: 20px;
-            text-align: center;
-        }
-
-        .qr-code-container {
-            width: 180px;
-            height: 180px;
-            border: 4px solid #1cdf78;
-            border-radius: 10px;
-            margin: 20px auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .qr-code {
-            width: 140px;
-            height: 140px;
-            object-fit: contain;
-        }
-
-        .student-info {
-            text-align: left;
-            margin-bottom: 20px;
-        }
-
-        .student-info p {
-            font-size: 1.1rem;
-            margin: 8px 0;
-            line-height: 1.5;
-        }
-
-        .info-label {
-            font-weight: bold;
-            color: #555;
-        }
-
-        .btn {
-            display: inline-block;
-            margin-right: 10px;
-            padding: 10px 20px;
-            background-color: #1cdf78;
-            color: #fff;
-            text-align: center;
-            text-decoration: none;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn:hover {
-            background-color: #1cdf78;
-        }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <div class="card-header">
+{% block content %}
+<div class="container mt-5">
+    <div class="card mx-auto" style="width: 320px;">
+        <div class="card-header text-center bg-success text-white">
             My Profile Details
         </div>
-        <div class="card-body">
-            <div class="qr-code-container">
+        <div class="card-body text-center">
+            <div class="qr-code-container mx-auto my-4">
                 <img class="qr-code" src="{{ qr_code_url }}" alt="QR Code">
             </div>
-            <div class="student-info">
-                <p><span class="info-label">Name:</span>{{user.first_name}}</p>
-                <p><span class="info-label">Race:</span>OCR</p>
-                <p><span class="info-label">Year:</span> 2024</p>
+            <div class="student-info text-left">
+                <p><span class="info-label font-weight-bold">Name:</span> {{ user.first_name }}</p>
+                <p><span class="info-label font-weight-bold">Race:</span> OCR</p>
+                <p><span class="info-label font-weight-bold">Year:</span> 2024</p>
             </div>
-           
-            <button class="btn btn-secondary" onclick="window.print()">Print</button>
+            <button class="btn btn-secondary mt-3" onclick="window.print()">Print</button>
         </div>
     </div>
+</div>
 
-    <!-- Bootstrap JS and dependencies (optional) -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+    .card {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .qr-code-container {
+        width: 180px;
+        height: 180px;
+        border: 4px solid #1cdf78;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .qr-code {
+        width: 140px;
+        height: 140px;
+        object-fit: contain;
+    }
+    .student-info p {
+        font-size: 1.1rem;
+        margin: 8px 0;
+        line-height: 1.5;
+    }
+    .btn {
+        background-color: #1cdf78;
+        border: none;
+        padding: 10px 20px;
+        color: #fff;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    .btn:hover {
+        background-color: #17a661;
+    }
+</style>
+{% endblock %}
