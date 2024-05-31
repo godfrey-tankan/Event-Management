@@ -25,6 +25,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+db.sqlite3
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -50,7 +51,6 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
-db.sqlite3
 media/
 
 # Translations
