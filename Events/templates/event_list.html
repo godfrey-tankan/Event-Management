@@ -99,8 +99,20 @@
 
       <h1 class="event-list-heading">
         Event List
-        <a href="{% url 'create_event' %}"><span>+</span></a>
+        <input
+          type="submit"
+          value="Create Event"
+          onclick="triggerLinkClick()"
+        />
       </h1>
+      <a class="add-event" href="{% url 'create_event' %}" id="add-event-link">
+      </a>
+
+      <script>
+        function triggerLinkClick() {
+          document.getElementById("add-event-link").click();
+        }
+      </script>
 
       <div class="row">
         {% for event in events %}
