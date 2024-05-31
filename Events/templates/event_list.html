@@ -2,181 +2,218 @@
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Event List</title>
-    <link href="{% static 'css/base.css' %}" rel="stylesheet">
+    <link href="{% static 'css/base.css' %}" rel="stylesheet" />
     <!-- Add Bootstrap CSS link -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <style>
-        /* Your existing CSS styles */
-        .search-event {
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        .event-list-heading {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .card-img-top {
-            width: 100%;
-            height: 200px; /* Adjust height as needed */
-            object-fit: cover;
-        }
+      /* Your existing CSS styles */
+      .search-event {
+        width: 100%;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+      .event-list-heading {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .card-img-top {
+        width: 100%;
+        height: 200px; /* Adjust height as needed */
+        object-fit: cover;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <!-- Replace existing header with new Bootstrap navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">OCR</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-    
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'dashboard' %}">Home</a>
-                </li>
+      <a class="navbar-brand" href="#">OCR</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-                <li class="nav-item active">
-                    <a class="nav-link" href="#">Events <span class="sr-only">(current)</span></a>
-                </li>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'dashboard' %}">Home</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="#"
+              >Events <span class="sr-only">(current)</span></a
+            >
+          </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="#">About</a>
-                </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">About</a>
+          </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'request_user_profile' %}">Account</a>
-                </li>
-
-            </ul>
-            <form class="form-inline my-2 my-lg-0">
-                <input class="form-control mr-sm-2 search-event" type="search" placeholder="Search event by name/location here!" aria-label="Search">
-            </form>
-            <div class="user">
-                {% if user.is_authenticated %}
-                    Welcome, {{ user.username }} | <a href="{% url 'logout' %}">Logout</a>
-                {% else %}
-                    <a href="{% url 'login' %}">Login</a> | <a href="{% url 'register' %}">Register</a>
-                {% endif %}
-            </div>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'request_user_profile' %}"
+              >Account</a
+            >
+          </li>
+        </ul>
+        <form class="form-inline my-2 my-lg-0">
+          <input
+            class="form-control mr-sm-2 search-event"
+            type="search"
+            placeholder="Search event by name/location here!"
+            aria-label="Search"
+          />
+        </form>
+        <div class="user">
+          {% if user.is_authenticated %} Welcome, {{ user.username }} |
+          <a href="{% url 'logout' %}">Logout</a>
+          {% else %}
+          <a href="{% url 'login' %}">Login</a> |
+          <a href="{% url 'register' %}">Register</a>
+          {% endif %}
         </div>
+      </div>
     </nav>
 
     <div id="content" class="container">
-        {% if messages %}
-            <ul class="messages">
-                {% for message in messages %}
-                    {% if message.tags == 'success' %}
-                        <li class="alert alert-success">{{ message }}</li>
-                    {% elif message.tags == 'error' %}
-                        <li class="alert alert-danger">{{ message }}</li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-        {% endif %}
+      {% if messages %}
+      <ul class="messages">
+        {% for message in messages %} {% if message.tags == 'success' %}
+        <li class="alert alert-success">{{ message }}</li>
+        {% elif message.tags == 'error' %}
+        <li class="alert alert-danger">{{ message }}</li>
+        {% endif %} {% endfor %}
+      </ul>
+      {% endif %}
 
-        <h1 class="event-list-heading">Event List</h1>
+      <h1 class="event-list-heading">
+        Event List
+        <a href="{% url 'create_event' %}"><span>+</span></a>
+      </h1>
 
-        <div class="row">
-            {% for event in events %}
-                <div class="col-md-4 mb-3 card event-card" data-name="{{ event.name|lower }}" data-location="{{ event.location|lower }}">
-                    <div class="card">
-                        {% if event.img %}
-                            <!-- Display event image if available -->
-                            <img class="card-img-top" src="{{ event.img.url }}" alt="{{ event.name }}">
-                        {% else %}
-                            <!-- Default image if no event image is available -->
-                            <img class="card-img-top" src="{% static 'images/default_event_image.jpg' %}" alt="Default Image">
-                        {% endif %}
+      <div class="row">
+        {% for event in events %}
+        <div
+          class="col-md-4 mb-3 card event-card"
+          data-name="{{ event.name|lower }}"
+          data-location="{{ event.location|lower }}"
+        >
+          <div class="card">
+            {% if event.img %}
+            <!-- Display event image if available -->
+            <img
+              class="card-img-top"
+              src="{{ event.img.url }}"
+              alt="{{ event.name }}"
+            />
+            {% else %}
+            <!-- Default image if no event image is available -->
+            <img
+              class="card-img-top"
+              src="{% static 'images/default_event_image.jpg' %}"
+              alt="Default Image"
+            />
+            {% endif %}
 
-                        <div class="card-body">
-                            <h5 class="card-title">{{ event.name }}</h5>
-                            <p class="card-text">
-                                <strong>Date:</strong> {{ event.date }}<br>
-                                <strong>Location:</strong> {{ event.location }}
-                            </p>
-                            <form method="post" action="{% url 'register_for_event' event.id %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="user_id" value="{{ user.id }}">
-                                {% if user.is_authenticated and user.is_staff %}
-                                    <a href="{% url 'view_registered_users' event.id %}" class="btn btn-primary">View Registered Users</a>
-                                    <a href="{% url 'edit_event' event.id %}" class="btn btn-info">Edit</a>
-                                    <a href="{% url 'delete_event' event.id %}" class="btn btn-danger">Delete</a>
-                                {% else %}
-                                    {% if event.id in registered_events_id_list %}
-                                        <button type="submit" class="btn btn-danger">De-register</button>
-                                    {% else %}
-                                        <button type="submit" class="btn btn-success">Register</button>
-                                    {% endif %}
-                                {% endif %}
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
+            <div class="card-body">
+              <h5 class="card-title">{{ event.name }}</h5>
+              <p class="card-text">
+                <strong>Date:</strong> {{ event.date }}<br />
+                <strong>Location:</strong> {{ event.location }}
+              </p>
+              <form
+                method="post"
+                action="{% url 'register_for_event' event.id %}"
+              >
+                {% csrf_token %}
+                <input type="hidden" name="user_id" value="{{ user.id }}" />
+                {% if user.is_authenticated and user.is_staff %}
+                <a
+                  href="{% url 'view_registered_users' event.id %}"
+                  class="btn btn-primary"
+                  >View Registered Users</a
+                >
+                <a href="{% url 'edit_event' event.id %}" class="btn btn-info"
+                  >Edit</a
+                >
+                <a
+                  href="{% url 'delete_event' event.id %}"
+                  class="btn btn-danger"
+                  >Delete</a
+                >
+                {% else %} {% if event.id in registered_events_id_list %}
+                <button type="submit" class="btn btn-danger">
+                  De-register
+                </button>
+                {% else %}
+                <button type="submit" class="btn btn-success">Register</button>
+                {% endif %} {% endif %}
+              </form>
+            </div>
+          </div>
         </div>
+        {% endfor %}
+      </div>
     </div>
 
     <!-- Add Bootstrap JS (optional, if needed) -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-
-
-
-
-
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.querySelector('.search-event');
-            const form = document.createElement('form');
-            form.classList.add('form-inline', 'my-2', 'my-lg-0');
-    
-            const inputGroup = document.createElement('div');
-            inputGroup.classList.add('input-group');
-    
-            const input = document.createElement('input');
-            input.classList.add('form-control', 'mr-sm-2');
-            input.setAttribute('type', 'search');
-            input.setAttribute('placeholder', 'Search');
-            inputGroup.appendChild(input);
-    
-            const button = document.createElement('button');
-            button.classList.add('btn', 'btn-outline-success', 'my-2', 'my-sm-0');
-            button.setAttribute('type', 'submit');
-            button.textContent = 'Search';
-            inputGroup.appendChild(button);
-    
-            form.appendChild(inputGroup);
-    
-            searchInput.parentNode.replaceChild(form, searchInput);
-    
-            form.addEventListener('submit', function(event) {
-                event.preventDefault();
-                const searchText = input.value.trim().toLowerCase();
-    
-                const eventCards = document.querySelectorAll('.event-card');
-    
-                eventCards.forEach(function(card) {
-                    const name = card.dataset.name;
-                    const location = card.dataset.location;
-                    const cardElement = card.closest('.card');
-    
-                    if (name.includes(searchText) || location.includes(searchText)) {
-                        cardElement.style.display = 'block';
-                    } else {
-                        cardElement.style.display = 'none';
-                    }
-                });
-            });
-        });
-    </script>
-    
+      document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.querySelector(".search-event");
+        const form = document.createElement("form");
+        form.classList.add("form-inline", "my-2", "my-lg-0");
 
-</body>
+        const inputGroup = document.createElement("div");
+        inputGroup.classList.add("input-group");
+
+        const input = document.createElement("input");
+        input.classList.add("form-control", "mr-sm-2");
+        input.setAttribute("type", "search");
+        input.setAttribute("placeholder", "Search");
+        inputGroup.appendChild(input);
+
+        const button = document.createElement("button");
+        button.classList.add("btn", "btn-outline-success", "my-2", "my-sm-0");
+        button.setAttribute("type", "submit");
+        button.textContent = "Search";
+        inputGroup.appendChild(button);
+
+        form.appendChild(inputGroup);
+
+        searchInput.parentNode.replaceChild(form, searchInput);
+
+        form.addEventListener("submit", function (event) {
+          event.preventDefault();
+          const searchText = input.value.trim().toLowerCase();
+
+          const eventCards = document.querySelectorAll(".event-card");
+
+          eventCards.forEach(function (card) {
+            const name = card.dataset.name;
+            const location = card.dataset.location;
+            const cardElement = card.closest(".card");
+
+            if (name.includes(searchText) || location.includes(searchText)) {
+              cardElement.style.display = "block";
+            } else {
+              cardElement.style.display = "none";
+            }
+          });
+        });
+      });
+    </script>
+  </body>
 </html>

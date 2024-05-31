@@ -2,80 +2,83 @@
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title >Create Event</title>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Create Event</title>
     <link href="{% static "css/base.css" %}" rel="stylesheet">
     <!-- Replace 'your_css_file.css' with the path to your CSS file -->
     <style>
+      .event-form {
+        max-width: 400px;
+        margin: 0 auto;
+        margin-left: 40%;
+        margin-top: 100px;
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 5px;
+        min-height: 400px;
+      }
 
-    .event-form {
-    max-width: 400px;
-    margin: 0 auto;
-    margin-left: 40%;
-    margin-top: 100px;
-    border: 1px solid #ccc;
-    padding: 20px;
-    border-radius: 5px;
-    min-height: 400px;
-    }
+      .event-form input[type="submit"] {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 10px 10px;
+        border-radius: 2px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        margin-left: 70%;
+        margin-top: 20px;
+      }
 
-.event-form input[type="submit"] {
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  padding: 10px 10px;
-  border-radius: 2px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  margin-left: 70%;
-  margin-top: 20px;
-;
-}
+      .event-form input[type="submit"]:hover {
+        background-color: #0069d9;
+      }
 
-.event-form input[type="submit"]:hover {
-  background-color: #0069d9;
-}
-
-.event-form input[type="text"] {
-  width: 90%;
-  padding: 10px;
-  margin-bottom: 4px;
-  background-color: #889db1;
-}
-
+      .event-form input[type="text"] {
+        width: 90%;
+        padding: 10px;
+        margin-bottom: 4px;
+        background-color: #889db1;
+      }
     </style>
-</head>
-<body style="background-image:url(/media/background_images/event.jpg);background-repeat: no-repeat;background-size: cover;background-blend-mode: darken;">
+  </head>
+  <body
+    style="
+      background-image: url(/media/background_images/event.jpg);
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-blend-mode: darken;
+    "
+  >
     <div id="header">
-        <div class="logo">Logo</div>
-        <ul class="menu">
-            <li><a href="{% url 'event_list' %}">Events List</a></li>
-            <!-- Add more menu items as needed -->
-        </ul>
-        <div class="user">
-            {% if user.is_authenticated %}
-                Welcome, {{ user.username }} | <a href="{% url 'logout' %}">Logout</a>
-            {% else %}
-                <a href="{% url 'login' %}">Login</a> | <a href="{% url 'register' %}">Register</a>
-            {% endif %}
-        </div>
+      <div class="logo">Logo</div>
+      <ul class="menu">
+        <li><a href="{% url 'event_list' %}">Events List</a></li>
+        <!-- Add more menu items as needed -->
+      </ul>
+      <div class="user">
+        {% if user.is_authenticated %} Welcome, {{ user.username }} |
+        <a href="{% url 'logout' %}">Logout</a>
+        {% else %}
+        <a href="{% url 'login' %}">Login</a> |
+        <a href="{% url 'register' %}">Register</a>
+        {% endif %}
+      </div>
     </div>
     <div id="content" class="event-form">
-        {% if event_mode %}
-        <h1 style="text-decoration: none;">Edit Event</h1>
+      {% if event_mode %}
+      <h1 style="text-decoration: none">Edit Event</h1>
+      {% else %}
+      <h1 style="text-decoration: none">Create Event</h1>
+      {% endif %}
+      <form method="post">
+        {% csrf_token %} {{ form.as_p }} {% if event_mode %}
+        <input type="submit" value="Update Event" />
         {% else %}
-        <h1 style="text-decoration: none;">Create Event</h1>
+        <input type="submit" value="Create Event" />
         {% endif %}
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            {% if event_mode %}
-            <input type="submit" value="Update Event">
-            {% else %}
-            <input type="submit" value="Create Event">
-            {% endif %}
-        </form>
+      </form>
     </div>
-</body>
+  </body>
 </html>
