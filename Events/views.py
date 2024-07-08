@@ -16,6 +16,13 @@ import re
 import qrcode
 from datetime import timedelta
 from django.views.decorators.csrf import csrf_exempt
+import logging
+from django.core.mail import send_mail
+from django.contrib import messages
+from django.conf import settings
+from django.contrib.auth.decorators import user_passes_test
+
+logger = logging.getLogger(__name__)
 
 
 # import cv2
@@ -360,3 +367,34 @@ def scan_QR_code_mobile(request):
             return JsonResponse({'message': None, 'time_taken': None, 'error': 'No user Found.'})
     else:
         return render(request, 'qr_code_scan.html')
+
+@user_passes_test(lambda u: u.is_superuser)
+def send_email_user(request):
+    if request.method == 'POST':
+        try:
+            users = User.objects.all()
+            from_email = 'junioralexio607@gmail.com'
+
+            for user in users:
+                # Filter scans for the current user that have a non-null time_taken value
+                scans = BarcodeScan.objects.filter(user=user, time_taken__isnull=False)
+                if scans.exists():
+                    subject = 'Your Barcode Scan Details'
+                    message = f"Hello {user.username},\n\nHere are your scan details:\n"
+                    for scan in scans:
+                        message += f"Scan Time: {scan.scan_time}, Time Taken: {scan.time_taken} seconds\n"
+                    message += "\nBest Regards,\nOCR"
+                    recipient_list = [user.email]
+
+                    # Log the email details before sending
+                    logger.info(f'Sending email to {user.email} with subject "{subject}"')
+                    send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+                    messages.success(request, f'Email sent to {user.email}')
+            
+            return redirect('send_email')  # Redirect to avoid resubmission
+        except Exception as e:
+            logger.error("Error sending emails: %s", e)
+            messages.error(request, 'An error occurred while sending emails.')
+    
+    return render(request, 'send_email.html')
+
